@@ -1,0 +1,24 @@
+{
+  "name": "nodebb-plugin-reputation-rules",
+  "version": "0.0.1",
+  "description": "Reputation rules to prevent abuse and make it more reliable",
+  "main": "library.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/exo-do/nodebb-plugin-reputation-rules"
+  },
+  "keywords": [
+    "nodebb",
+    "plugin",
+    "reputation",
+    "rules"
+  ],
+  "author": {
+    "name": "TheBronx"
+  },
+  "license": "GNU-GPL v2",
+  "bugs": {
+    "url": "https://github.com/exo-do/nodebb-plugin-reputation-rules/issues"
+  },
+  "readmeFilename": "README.md"
+}
