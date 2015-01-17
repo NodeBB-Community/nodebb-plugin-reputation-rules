@@ -1,50 +1,49 @@
 "use strict";
 
 var plugin = {},
-	User = module.parent.require('./user'),
-	Posts = module.parent.require('./posts');
+	ReputationManager = new (require('./ReputationManager'))(),
+	ReputationParams = require('./ReputationParams');
+
 
 plugin.upvote = function(vote) {
 	console.log('user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
-	User.getUserData(vote.uid, function(err, user) {
+	var reputationParams = new ReputationParams(vote.uid, vote.pid, vote.current);
+	reputationParams.recoverParams(function(err, data) {
 		if (err) {
-			console.log(err);
+			console.log('[nodebb-reputation-rules] Error on upvote hook');
 			return;
 		}
 
-		console.log(user);
-	});
-
-	Posts.getPostData(vote.pid, function(err, post) {
-		if (err) {
-			console.log(err);
-			return;
-		}
-
-		console.log(post);
+		console.log('user can upvote post? ' + ReputationManager.userCanUpvotePost(data.user, data.post));
 	});
 };
 
 plugin.downvote = function(vote) {
 	console.log('user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
-	User.getUserData(vote.uid, function(err, user) {
+	var reputationParams = new ReputationParams(vote.uid, vote.pid, vote.current);
+	reputationParams.recoverParams(function(err, data) {
 		if (err) {
-			console.log(err);
+			console.log('[nodebb-reputation-rules] Error on downvote hook');
 			return;
 		}
 
-		console.log(user);
+		console.log('user can downvote post? ' + ReputationManager.userCanDownvotePost(data.user, data.post));
 	});
+};
 
-	Posts.getPostData(vote.pid, function(err, post) {
+plugin.unvote = function(vote) {
+	console.log('user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
+
+	var reputationParams = new ReputationParams(vote.uid, vote.pid, vote.current);
+	reputationParams.recoverParams(function(err, data) {
 		if (err) {
-			console.log(err);
+			console.log('[nodebb-reputation-rules] Error on unvote hook');
 			return;
 		}
 
-		console.log(post);
+
 	});
 };
 

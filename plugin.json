@@ -10,6 +10,9 @@
     },
     {
       "hook": "action:post.downvote", "method": "downvote"
+    },
+    {
+      "hook": "action:post.unvote", "method": "unvote"
     }
   ]
 }
