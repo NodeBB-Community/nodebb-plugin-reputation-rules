@@ -4,11 +4,10 @@ var async = require('async'),
 	User = module.parent.parent.require('./user'),
 	Posts = module.parent.parent.require('./posts');
 
-var ReputationParams = function(userId, postId, currentVote) {
+var ReputationParams = function(userId, postId) {
 	var _this = this;
 	this.userId = userId;
 	this.postId = postId;
-	this.currentVote = currentVote;
 
 	this.findUser = function(callback) {
 		User.getUserData(_this.userId, function(err, user) {

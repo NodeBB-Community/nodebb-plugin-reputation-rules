@@ -13,6 +13,15 @@
     },
     {
       "hook": "action:post.unvote", "method": "unvote"
+    },
+    {
+      "hook": "filter:post.upvote", "method": "filterUpvote"
+    },
+    {
+      "hook": "filter:post.downvote", "method": "filterDownvote"
+    },
+    {
+      "hook": "filter:post.unvote", "method": "filterUnvote"
     }
   ]
 }

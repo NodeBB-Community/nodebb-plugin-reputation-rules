@@ -4,7 +4,7 @@
  #1 para votar positivo necesitas tener 20 mensajes y llevar 7 días registrado (TODO: logros)
  #2 para votar negativo necesitas tener 50 mensajes,  llevar 15 días registrado y tener 10 de reputación
  #3 cada voto negativo te resta 1 de reputación a ti también
- #4 un usuario no puede votar más de x veces al día. sea x = reputación/10. con unos mínimo de 5 y un máximo de 50
+ #4 un usuario no puede votar más de x veces al día. sea x = reputación/10. con un mínimo de 5 y un máximo de 50
  #5 la reputación no funciona en algunas secciones del foro
  #6 no puedes votar a la misma persona más de 1 vez al mes
  #7 no puedes votar más de 5 mensajes de un mismo hilo
