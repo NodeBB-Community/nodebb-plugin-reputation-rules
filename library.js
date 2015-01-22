@@ -14,22 +14,54 @@ var plugin = {},
 plugin.upvote = function(vote) {
 	console.log('user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
+	//TODO if vote.current === 'downvote' hay que deshacer el downvote
+
 	//TODO calculate extra reputation points for post author
 };
 
 plugin.downvote = function(vote) {
 	console.log('user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
-	//TODO reduce voter's reputation too
+	//TODO if vote.current === 'upvote' hay que deshacer el upvote
+
+	//reduce voter's reputation by 1
+	var reputationParams = new ReputationParams(vote.uid, vote.pid);
+	reputationParams.recoverParams(function(err, data) {
+		if (err) {
+			console.log('[nodebb-reputation-rules] Error on downvote hook');
+			return;
+		}
+
+		decreaseUserReputation(vote.uid, 1, function(err) {
+			if (err) {
+				console.log('[nodebb-reputation-rules] Error on downvote filter hook');
+			}
+		});
+	});
 };
 
 plugin.unvote = function(vote) {
 	console.log('user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
-	/* TODO
-		1. undo a upvote: reduce author's reputation in case he won extra points when upvoted
-		2. undo a dowvote: increase voter's reputation by 1
+	/* how to undo a vote:
+		CASE upvote: reduce author's reputation in case he won extra points when upvoted //TODO
+		CASE dowvote: increase voter's reputation by 1
 	 */
+	var reputationParams = new ReputationParams(vote.uid, vote.pid);
+	reputationParams.recoverParams(function(err, data) {
+		if (err) {
+			console.log('[nodebb-reputation-rules] Error on unvote hook');
+			return;
+		}
+
+		if (vote.current === 'downvote') {
+			undoDownvote(data.user, data.post, function(err) {
+				if (err) {
+					console.log('[nodebb-reputation-rules] Error on upvote filter hook');
+				}
+			});
+		}
+	});
 };
 
 plugin.filterUpvote = function(command, callback) {
@@ -49,7 +81,7 @@ plugin.filterUpvote = function(command, callback) {
 			callback(new Error('[[error:unsufficient-permissions-upvote]]'));
 		} else {
 			console.log('[nodebb-reputation-rules] upvote allowed');
-			callback(null, data);
+			callback(null, command);
 		}
 	});
 };
@@ -71,16 +103,16 @@ plugin.filterDownvote = function(command, callback) {
 			callback(new Error('[[error:unsufficient-permissions-downvote]]'));
 		} else {
 			console.log('[nodebb-reputation-rules] downvote allowed');
-			callback(null, data);
+			callback(null, command);
 		}
 	});
 };
 
-plugin.filterUnvote = function(data, callback) {
+plugin.filterUnvote = function(command, callback) {
 	console.log('filter.post.unvote');
-	console.log(data);
+	console.log(command);
 
-	callback(null, data);
+	callback(null, command);
 };
 
 function getVoteFromCommand(command) {
@@ -92,27 +124,34 @@ function getVoteFromCommand(command) {
 }
 
 /* ----------------------------------------------------------------------------------- */
-/* -------------------- functions copied from /src/favourites.js --------------------- */
-/* ----------------------------------------------------------------------------------- */
-function removeVote(user, post, type, callback) {
-	//remove vote
-	db.sortedSetRemove('uid:' + user.uid + ':upvote', post.pid);
-	db.sortedSetRemove('uid:' + user.uid + ':downvote', post.pid);
+function undoUpvote(user, post, callback) {
+	//TODO find exra vote value
+	//decrease author's rep -extra
+}
 
-	//update user reputation and post votes
-	users.decrementUserFieldBy(post.uid, 'reputation', 1, function (err, newreputation) {
+function undoDownvote(user, post, callback) {
+	increaseUserReputation(user.uid, 1, callback);
+}
+
+function decreaseUserReputation(uid, amount, callback) {
+	users.decrementUserFieldBy(uid, 'reputation', amount, function (err, newreputation) {
 		if (err) {
 			return callback(err);
 		}
 
-		db.sortedSetAdd('users:reputation', newreputation, post.uid);
+		db.sortedSetAdd('users:reputation', newreputation, uid);
 
-		banUserForLowReputation(post.uid, newreputation);
+		banUserForLowReputation(uid, newreputation);
+	});
+}
 
-		var unvote = true;
-		adjustPostVotes(post.pid, post.uid, type, unvote, function(err, votes) {
-			posts.setPostField(post.pid, 'votes', votes, callback);
-		});
+function increaseUserReputation(uid, amount, callback) {
+	users.incrementUserFieldBy(uid, 'reputation', amount, function (err, newreputation) {
+		if (err) {
+			return callback(err);
+		}
+
+		db.sortedSetAdd('users:reputation', newreputation, uid);
 	});
 }
 
@@ -131,45 +170,6 @@ function banUserForLowReputation(uid, newreputation) {
 			});
 		});
 	}
-}
-
-function adjustPostVotes(pid, uid, type, unvote, callback) {
-	var notType = (type === 'upvote' ? 'downvote' : 'upvote');
-
-	async.series([
-		function(next) {
-			if (unvote) {
-				db.setRemove('pid:' + pid + ':' + type, uid, next);
-			} else {
-				db.setAdd('pid:' + pid + ':' + type, uid, next);
-			}
-		},
-		function(next) {
-			db.setRemove('pid:' + pid + ':' + notType, uid, next);
-		}
-	], function(err) {
-		if (err) {
-			return callback(err);
-		}
-
-		async.parallel({
-			upvotes: function(next) {
-				db.setCount('pid:' + pid + ':upvote', next);
-			},
-			downvotes: function(next) {
-				db.setCount('pid:' + pid + ':downvote', next);
-			}
-		}, function(err, results) {
-			if (err) {
-				return callback(err);
-			}
-			var voteCount = parseInt(results.upvotes, 10) - parseInt(results.downvotes, 10);
-
-			posts.updatePostVoteCount(pid, voteCount, function(err) {
-				callback(err, voteCount);
-			});
-		});
-	});
 }
 
 module.exports = plugin;
