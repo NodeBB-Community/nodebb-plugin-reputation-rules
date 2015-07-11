@@ -23,5 +23,8 @@
     {
       "hook": "filter:post.unvote", "method": "filterUnvote"
     }
-  ]
+  ],
+  "nbbpm": {
+    "compatibility": "^0.7.0"
+  }
 }

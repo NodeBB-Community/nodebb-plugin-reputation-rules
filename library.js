@@ -22,14 +22,21 @@ plugin.upvote = function(vote) {
 plugin.downvote = function(vote) {
 	console.log('user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
-	//TODO if vote.current === 'upvote' hay que deshacer el upvote
-
 	//reduce voter's reputation by 1
 	var reputationParams = new ReputationParams(vote.uid, vote.pid);
 	reputationParams.recoverParams(function(err, data) {
 		if (err) {
 			console.log('[nodebb-reputation-rules] Error on downvote hook');
 			return;
+		}
+
+		//deshacer un posible upvote: quitar al autor del post el "upvote" que le habian dado
+		if (vote.current === 'upvote') {
+			undoUpvote(data.author, data.post, function(err) {
+				if (err) {
+					console.log('[nodebb-reputation-rules] Error undoing upvote');
+				}
+			});
 		}
 
 		decreaseUserReputation(vote.uid, 1, function(err) {
@@ -44,8 +51,8 @@ plugin.unvote = function(vote) {
 	console.log('user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
 	/* how to undo a vote:
-		CASE upvote: reduce author's reputation in case he won extra points when upvoted //TODO
-		CASE dowvote: increase voter's reputation by 1
+		CASE upvote: reduce author's reputation in case he won extra points when upvoted
+		CASE dowvote: increase both user's reputation by 1 (voter and voted user)
 	 */
 	var reputationParams = new ReputationParams(vote.uid, vote.pid);
 	reputationParams.recoverParams(function(err, data) {
@@ -55,9 +62,15 @@ plugin.unvote = function(vote) {
 		}
 
 		if (vote.current === 'downvote') {
-			undoDownvote(data.user, data.post, function(err) {
+			undoDownvote(data.user, function(err) {
 				if (err) {
-					console.log('[nodebb-reputation-rules] Error on upvote filter hook');
+					console.log('[nodebb-reputation-rules] Error undoing downvote');
+				}
+			});
+		} else if (vote.current === 'upvote') {
+			undoUpvote(data.author, data.post, function(err) {
+				if (err) {
+					console.log('[nodebb-reputation-rules] Error undoing upvote');
 				}
 			});
 		}
@@ -125,12 +138,16 @@ function getVoteFromCommand(command) {
 
 /* ----------------------------------------------------------------------------------- */
 function undoUpvote(user, post, callback) {
-	//TODO find exra vote value
+	//TODO find extra vote value
+	var amount = 1;
+
 	//decrease author's rep -extra
+	decreaseUserReputation(user.uid, amount, callback);
 }
 
-function undoDownvote(user, post, callback) {
+function undoDownvote(user, callback) {
 	increaseUserReputation(user.uid, 1, callback);
+	//the system will take care of removing the "-1" to the post author
 }
 
 function decreaseUserReputation(uid, amount, callback) {
