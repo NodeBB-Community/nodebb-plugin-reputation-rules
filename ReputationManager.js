@@ -49,6 +49,11 @@ var ReputationManager = function() {
 
 		return true;
 	};
+
+	this.calculateUpvoteWeight = function(user) {
+		var weight = Math.floor(user.reputation/10);
+		return weight;
+	};
 };
 
 function hasEnoughPostsToUpvote(postcount) {

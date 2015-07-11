@@ -14,15 +14,40 @@ var plugin = {},
 plugin.upvote = function(vote) {
 	console.log('user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
-	//TODO if vote.current === 'downvote' hay que deshacer el downvote
+	var reputationParams = new ReputationParams(vote.uid, vote.pid);
+	reputationParams.recoverParams(function(err, data) {
+		if (err) {
+			console.log('[nodebb-reputation-rules] Error on downvote hook');
+			return;
+		}
 
-	//TODO calculate extra reputation points for post author
+		//deshacer un posible downvote: devolver +1 al usuario que emite el voto
+		if (vote.current === 'downvote') {
+			undoDownvote(data.user, function(err) {
+				if (err) {
+					console.log('[nodebb-reputation-rules] Error undoing downvote');
+				}
+			});
+		}
+
+		//calculate extra reputation points (depends on user who votes)
+		var extraPoints = ReputationManager.calculateUpvoteWeight(data.user);
+		//give extra points to author!
+		increaseUserReputation(data.author, extraPoints, function(err) {
+			if (err) {
+				console.log('[nodebb-reputation-rules] Error increasing author\'s reputation on upvote');
+				return;
+			}
+
+			//TODO log this operation so we can undo it in the future: extra points awarded, userId and authorId
+
+		});
+	});
 };
 
 plugin.downvote = function(vote) {
 	console.log('user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
-	//reduce voter's reputation by 1
 	var reputationParams = new ReputationParams(vote.uid, vote.pid);
 	reputationParams.recoverParams(function(err, data) {
 		if (err) {
@@ -39,6 +64,7 @@ plugin.downvote = function(vote) {
 			});
 		}
 
+		//and now the downvote: reduce voter's reputation by one
 		decreaseUserReputation(vote.uid, 1, function(err) {
 			if (err) {
 				console.log('[nodebb-reputation-rules] Error on downvote filter hook');
@@ -122,8 +148,8 @@ plugin.filterDownvote = function(command, callback) {
 };
 
 plugin.filterUnvote = function(command, callback) {
+	//unvote is always allowed, isn't it?
 	console.log('filter.post.unvote');
-	console.log(command);
 
 	callback(null, command);
 };
