@@ -1,5 +1,7 @@
 'use strict';
 
+var db = module.parent.parent.require('./database');
+
 /*
  #1 para votar positivo necesitas tener 20 mensajes y llevar 7 días registrado (TODO: logros)
  #2 para votar negativo necesitas tener 50 mensajes,  llevar 15 días registrado y tener 10 de reputación
@@ -17,6 +19,8 @@ var MIN_DAYS_TO_UPVOTE = 7;
 var MIN_POSTS_TO_DOWNVOTE = 50;
 var MIN_DAYS_TO_DOWNVOTE = 15;
 var MIN_REPUTATION_TO_DOWNVOTE = 10;
+
+var REP_LOG_NAMESPACE = "reputationLog";
 
 var ReputationManager = function() {
 	var _this = this;
@@ -53,6 +57,18 @@ var ReputationManager = function() {
 	this.calculateUpvoteWeight = function(user) {
 		var weight = Math.floor(user.reputation/10);
 		return weight;
+	};
+
+	this.saveVoteLog = function(vote, callback) {
+		var voteIdentifier = REP_LOG_NAMESPACE + ":" + vote.voterId + ":" + vote.authorId;
+
+		db.setObject(voteIdentifier, vote, function(err) {
+			if (err) {
+				if (callback) callback(err);
+				return;
+			}
+			if (callback) callback(null, vote);
+		});
 	};
 };
 

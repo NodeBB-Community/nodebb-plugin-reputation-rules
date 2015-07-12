@@ -12,7 +12,7 @@ var plugin = {},
 
 
 plugin.upvote = function(vote) {
-	console.log('user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
+	console.log('[hook:upvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
 	var reputationParams = new ReputationParams(vote.uid, vote.pid);
 	reputationParams.recoverParams(function(err, data) {
@@ -32,6 +32,7 @@ plugin.upvote = function(vote) {
 
 		//calculate extra reputation points (depends on user who votes)
 		var extraPoints = ReputationManager.calculateUpvoteWeight(data.user);
+
 		//give extra points to author!
 		increaseUserReputation(data.author, extraPoints, function(err) {
 			if (err) {
@@ -39,14 +40,27 @@ plugin.upvote = function(vote) {
 				return;
 			}
 
-			//TODO log this operation so we can undo it in the future: extra points awarded, userId and authorId
+			//log this operation so we can undo it in the future
+			var voteLog = {
+				'date': new Date(),
+				'voterId': data.user.uid,
+				'authorId': data.author.uid,
+				'postId': data.post.pid,
+				'amount': extraPoints
+			};
+			ReputationManager.saveVoteLog(voteLog, function(err) {
+				if (err) {
+					console.log('[nodebb-reputation-rules] Error saving vote log: ' + err.message);
+					console.dir(voteLog);
+				}
+			});
 
 		});
 	});
 };
 
 plugin.downvote = function(vote) {
-	console.log('user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
+	console.log('[hook:downvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
 	var reputationParams = new ReputationParams(vote.uid, vote.pid);
 	reputationParams.recoverParams(function(err, data) {
@@ -74,7 +88,7 @@ plugin.downvote = function(vote) {
 };
 
 plugin.unvote = function(vote) {
-	console.log('user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
+	console.log('[hook:unvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
 	/* how to undo a vote:
 		CASE upvote: reduce author's reputation in case he won extra points when upvoted
@@ -185,16 +199,22 @@ function decreaseUserReputation(uid, amount, callback) {
 		db.sortedSetAdd('users:reputation', newreputation, uid);
 
 		banUserForLowReputation(uid, newreputation);
+
+		callback();
 	});
 }
 
 function increaseUserReputation(uid, amount, callback) {
+	if (amount <= 0) callback();
+
 	users.incrementUserFieldBy(uid, 'reputation', amount, function (err, newreputation) {
 		if (err) {
 			return callback(err);
 		}
 
 		db.sortedSetAdd('users:reputation', newreputation, uid);
+
+		callback();
 	});
 }
 
