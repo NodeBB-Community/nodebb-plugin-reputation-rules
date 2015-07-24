@@ -32,7 +32,7 @@ plugin.upvote = function(vote) {
 		var extraPoints = ReputationManager.calculateUpvoteWeight(data.user);
 
 		//give extra points to author!
-		increaseUserReputation(data.author, extraPoints, function(err) {
+		increaseUserReputation(data.author.uid, extraPoints, function(err) {
 			if (err) {
 				console.log('[nodebb-reputation-rules] Error increasing author\'s reputation on upvote');
 				return;
@@ -71,7 +71,7 @@ plugin.downvote = function(vote) {
 
 		//deshacer un posible upvote: quitar al autor del post el "upvote" que le habian dado
 		if (vote.current === 'upvote') {
-			undoUpvote(data.author, data.post, function(err) {
+			undoUpvote(data.user, data.author, data.post, function(err) {
 				if (err) {
 					console.log('[nodebb-reputation-rules] Error undoing upvote');
 				}
@@ -140,7 +140,7 @@ plugin.unvote = function(vote) {
 				});
 			});
 		} else if (vote.current === 'upvote') {
-			undoUpvote(data.author, data.post, function(err) {
+			undoUpvote(data.user, data.author, data.post, function(err) {
 				if (err) {
 					console.log('[nodebb-reputation-rules] Error undoing upvote');
 					return;
@@ -217,12 +217,19 @@ function getVoteFromCommand(command) {
 }
 
 /* ----------------------------------------------------------------------------------- */
-function undoUpvote(user, post, callback) {
-	//TODO find extra vote value
-	var amount = 1;
+function undoUpvote(user, author, post, callback) {
+	//find extra vote value
+	ReputationManager.findVoteLog(user, author, post, function(err, voteLog) {
+		if (err) {
+			callback(err);
+			return;
+		}
 
-	//decrease author's rep -extra
-	decreaseUserReputation(user.uid, amount, callback);
+		console.dir(voteLog);
+		var amount = voteLog.amount;
+		//decrease author's rep -extra
+		decreaseUserReputation(author.uid, amount, callback);
+	});
 }
 
 function undoDownvote(user, callback) {
@@ -231,6 +238,9 @@ function undoDownvote(user, callback) {
 }
 
 function decreaseUserReputation(uid, amount, callback) {
+	if (amount >= 0) callback();
+
+	console.log("increase user's reputation (" + uid + ") by " + amount);
 	users.decrementUserFieldBy(uid, 'reputation', amount, function (err, newreputation) {
 		if (err) {
 			return callback(err);
@@ -247,6 +257,7 @@ function decreaseUserReputation(uid, amount, callback) {
 function increaseUserReputation(uid, amount, callback) {
 	if (amount <= 0) callback();
 
+	console.log("increase user's reputation (" + uid + ") by " + amount);
 	users.incrementUserFieldBy(uid, 'reputation', amount, function (err, newreputation) {
 		if (err) {
 			return callback(err);

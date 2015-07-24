@@ -95,6 +95,22 @@ var ReputationManager = function() {
 			if (callback) callback(null, vote);
 		});
 	};
+
+	this.findVoteLog = function(user, author, post, callback) {
+		var voteIdentifier = REP_LOG_NAMESPACE + ":"
+			+ user.uid + ":"
+			+ author.uid + ":"
+			+ post.tid + ":"
+			+ post.pid;
+
+		db.getObject(voteIdentifier, function(err, vote) {
+			if (err) {
+				if (callback) callback(err);
+				return;
+			}
+			if (callback) callback(null, vote);
+		});
+	};
 };
 
 function hasEnoughPostsToUpvote(postcount) {
