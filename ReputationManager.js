@@ -56,13 +56,38 @@ var ReputationManager = function() {
 
 	this.calculateUpvoteWeight = function(user) {
 		var weight = Math.floor(user.reputation/10);
+		if (weight<0) weight = 0;
 		return weight;
 	};
 
-	this.saveVoteLog = function(vote, callback) {
-		var voteIdentifier = REP_LOG_NAMESPACE + ":" + vote.voterId + ":" + vote.authorId;
+	this.logVote = function(vote, callback) {
+		var voteIdentifier = REP_LOG_NAMESPACE + ":"
+			+ vote.voterId + ":"
+			+ vote.authorId + ":"
+			+ vote.topicId + ":"
+			+ vote.postId;
+
+		vote.undone = false;
 
 		db.setObject(voteIdentifier, vote, function(err) {
+			if (err) {
+				if (callback) callback(err);
+				return;
+			}
+			if (callback) callback(null, vote);
+		});
+	};
+
+	this.logVoteUndone = function(vote, callback) {
+		var voteIdentifier = REP_LOG_NAMESPACE + ":"
+			+ vote.voterId + ":"
+			+ vote.authorId + ":"
+			+ vote.topicId + ":"
+			+ vote.postId;
+
+		vote.undone = true;
+
+		db.setObjectField(voteIdentifier, 'undone', true, function(err) {
 			if (err) {
 				if (callback) callback(err);
 				return;

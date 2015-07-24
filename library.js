@@ -3,8 +3,6 @@
 var plugin = {},
     db = module.parent.require('./database'),
 	winston = require('winston'),
-	async = require('async'),
-	posts = module.parent.require('./posts'),
 	users = module.parent.require('./user'),
 	meta = module.parent.require('./meta'),
 	ReputationManager = new (require('./ReputationManager'))(),
@@ -45,10 +43,12 @@ plugin.upvote = function(vote) {
 				'date': new Date(),
 				'voterId': data.user.uid,
 				'authorId': data.author.uid,
+				'topicId': parseInt(data.post.tid, 10),
 				'postId': data.post.pid,
+				'type': 'upvote',
 				'amount': extraPoints
 			};
-			ReputationManager.saveVoteLog(voteLog, function(err) {
+			ReputationManager.logVote(voteLog, function(err) {
 				if (err) {
 					console.log('[nodebb-reputation-rules] Error saving vote log: ' + err.message);
 					console.dir(voteLog);
@@ -83,6 +83,23 @@ plugin.downvote = function(vote) {
 			if (err) {
 				console.log('[nodebb-reputation-rules] Error on downvote filter hook');
 			}
+
+			//log this operation so we can undo it in the future
+			var voteLog = {
+				'date': new Date(),
+				'voterId': data.user.uid,
+				'authorId': data.author.uid,
+				'topicId': parseInt(data.post.tid),
+				'postId': data.post.pid,
+				'type': 'downvote',
+				'amount': -1
+			};
+			ReputationManager.logVote(voteLog, function(err) {
+				if (err) {
+					console.log('[nodebb-reputation-rules] Error saving vote log: ' + err.message);
+					console.dir(voteLog);
+				}
+			});
 		});
 	});
 };
@@ -101,17 +118,40 @@ plugin.unvote = function(vote) {
 			return;
 		}
 
+		var voteLogIdentifier = {
+			'voterId': data.user.uid,
+			'authorId': data.author.uid,
+			'topicId': parseInt(data.post.tid),
+			'postId': data.post.pid
+		};
+
 		if (vote.current === 'downvote') {
 			undoDownvote(data.user, function(err) {
 				if (err) {
 					console.log('[nodebb-reputation-rules] Error undoing downvote');
+					return;
 				}
+
+				ReputationManager.logVoteUndone(voteLogIdentifier, function(err) {
+					if (err) {
+						console.log('[nodebb-reputation-rules] Error updating vote log: ' + err.message);
+						console.dir(voteLogIdentifier);
+					}
+				});
 			});
 		} else if (vote.current === 'upvote') {
 			undoUpvote(data.author, data.post, function(err) {
 				if (err) {
 					console.log('[nodebb-reputation-rules] Error undoing upvote');
+					return;
 				}
+
+				ReputationManager.logVoteUndone(voteLogIdentifier, function(err) {
+					if (err) {
+						console.log('[nodebb-reputation-rules] Error updating vote log: ' + err.message);
+						console.dir(voteLogIdentifier);
+					}
+				});
 			});
 		}
 	});
