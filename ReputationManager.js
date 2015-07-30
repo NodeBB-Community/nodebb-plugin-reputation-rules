@@ -3,14 +3,33 @@
 var db = module.parent.parent.require('./database');
 
 /*
- #1 para votar positivo necesitas tener 20 mensajes y llevar 7 días registrado (TODO: logros)
- #2 para votar negativo necesitas tener 50 mensajes,  llevar 15 días registrado y tener 10 de reputación
- #3 cada voto negativo te resta 1 de reputación a ti también (un voto negativo siempre cuenta -1)
- #4 un usuario no puede votar más de x veces al día. sea x = reputación/10. con un mínimo de 5 y un máximo de 50
- #5 la reputación no funciona en algunas secciones del foro
- #6 no puedes votar a la misma persona más de 1 vez al mes
- #7 no puedes votar más de 5 mensajes de un mismo hilo
- #8 el valor de un voto positivo depende de la reputación del votante: valor = 1 + floor(reputación/10)
+Rules to prevent abuse of the reputation system and reward most valuable users.
+
+ Rule #1 upvoting: user must have
+ 			- {MIN_POSTS_TO_UPVOTE} posts or more
+ 			- at least {MIN_DAYS_TO_UPVOTE} days since registration
+
+ Rule #2 downvoting: user must have
+ 			- {MIN_POSTS_TO_DOWNVOTE} posts or more
+ 			- at least {MIN_DAYS_TO_DOWNVOTE} since registration
+ 			- {MIN_REPUTATION_TO_DOWNVOTE} reputation or more
+
+ Rule #3 downvoting costs 1 reputation (user who votes loses 1 reputation)
+
+ Rule #4 one user can't vote more than X times a day, being X = reputation/10. With a minimum of 5 and a max of 50
+
+ Rule #5 reputation can be disabled in certain subforums
+
+ Rule #6 a user cannot vote the same person twice in a month
+
+ Rule #7 a user cannot vote more than 5 messages in the same thread
+
+ Rule #8 upvotes give extra reputation depending on the user who is voting:
+ 			- extra reputation = floor(voter_reputation/10)
+
+ Rule #9 undoing votes:
+ 			- undoing an upvote should remove extra reputation awarded when upvote was given (extra rep should not be recalculated)
+ 			- undoing a downvote should give +1 to voter (and also +1 to post author, but that's something NodeBB already takes cares of)
  */
 
 var MIN_POSTS_TO_UPVOTE = 20;
