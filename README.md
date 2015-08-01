@@ -16,16 +16,16 @@
 ### Rule #3 
 Downvoting costs 1 reputation (user who votes loses 1 reputation)
 
-### Rule #4 
+### (TO-DO) Rule #4 
 One user can't vote (up or down) more than `X` times a day, being `X = reputation/10`. With a minimum of 5 and a max of 50
 
-### Rule #5 
+### (TO-DO) Rule #5 
 Reputation can be disabled in certain subforums
 
-### Rule #6 
+### (TO-DO) Rule #6 
 A user cannot vote the same person twice in a month
 
-### Rule #7 
+### (TO-DO) Rule #7 
 A user cannot vote more than 5 messages in the same thread
 
 ### Rule #8 
