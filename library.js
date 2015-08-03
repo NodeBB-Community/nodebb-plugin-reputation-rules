@@ -169,13 +169,15 @@ plugin.filterUpvote = function(command, callback) {
 			return;
 		}
 
-		if (!ReputationManager.userCanUpvotePost(data.user, data.post)) {
-			console.log('[nodebb-reputation-rules] upvote not allowed');
-			callback(new Error('[[error:unsufficient-permissions-upvote]]'));
-		} else {
-			console.log('[nodebb-reputation-rules] upvote allowed');
-			callback(null, command);
-		}
+		ReputationManager.userCanUpvotePost(data.user, data.post, function(result) {
+			if (!result.allowed) {
+				console.log('[nodebb-reputation-rules] upvote not allowed');
+				callback(new Error('[[error:' + result.reason + ']]'));
+			} else {
+				console.log('[nodebb-reputation-rules] upvote allowed');
+				callback(null, command);
+			}
+		});
 	});
 };
 
@@ -191,13 +193,15 @@ plugin.filterDownvote = function(command, callback) {
 			return;
 		}
 
-		if (!ReputationManager.userCanDownvotePost(data.user, data.post)) {
-			console.log('[nodebb-reputation-rules] downvote not allowed');
-			callback(new Error('[[error:unsufficient-permissions-downvote]]'));
-		} else {
-			console.log('[nodebb-reputation-rules] downvote allowed');
-			callback(null, command);
-		}
+		ReputationManager.userCanDownvotePost(data.user, data.post, function(result) {
+			if (!result.allowed) {
+				console.log('[nodebb-reputation-rules] downvote not allowed');
+				callback(new Error('[[error:' + result.reason + ']]'));
+			} else {
+				console.log('[nodebb-reputation-rules] downvote allowed');
+				callback(null, command);
+			}
+		});
 	});
 };
 

@@ -1,36 +1,7 @@
 'use strict';
 
-var db = module.parent.parent.require('./database');
-
-/*
-Rules to prevent abuse of the reputation system and reward most valuable users.
-
- Rule #1 upvoting: user must have
- 			- {MIN_POSTS_TO_UPVOTE} posts or more
- 			- at least {MIN_DAYS_TO_UPVOTE} days since registration
-
- Rule #2 downvoting: user must have
- 			- {MIN_POSTS_TO_DOWNVOTE} posts or more
- 			- at least {MIN_DAYS_TO_DOWNVOTE} since registration
- 			- {MIN_REPUTATION_TO_DOWNVOTE} reputation or more
-
- Rule #3 downvoting costs 1 reputation (user who votes loses 1 reputation)
-
- Rule #4 one user can't vote more than X times a day, being X = reputation/10. With a minimum of 5 and a max of 50
-
- Rule #5 reputation can be disabled in certain subforums
-
- Rule #6 a user cannot vote the same person twice in a month
-
- Rule #7 a user cannot vote more than 5 messages in the same thread
-
- Rule #8 upvotes give extra reputation depending on the user who is voting:
- 			- extra reputation = floor(voter_reputation/10)
-
- Rule #9 undoing votes:
- 			- undoing an upvote should remove extra reputation awarded when upvote was given (extra rep should not be recalculated)
- 			- undoing a downvote should give +1 to voter (and also +1 to post author, but that's something NodeBB already takes cares of)
- */
+var db = module.parent.parent.require('./database'),
+	async = require('async');
 
 var MIN_POSTS_TO_UPVOTE = 20;
 var MIN_DAYS_TO_UPVOTE = 7;
@@ -39,38 +10,116 @@ var MIN_POSTS_TO_DOWNVOTE = 50;
 var MIN_DAYS_TO_DOWNVOTE = 15;
 var MIN_REPUTATION_TO_DOWNVOTE = 10;
 
+var MAX_VOTES_PER_THREAD = 5;
+
 var REP_LOG_NAMESPACE = "reputationLog";
+
+var UserVotingPermissions = function(user, post) {
+	var _this = this;
+	this.user = user;
+	this.post = post;
+
+	this.hasEnoughPostsToUpvote = function(callback) {
+		var allowed = _this.user.postcount > MIN_POSTS_TO_UPVOTE;
+		if (!allowed) callback({'reason': 'notEnoughPosts'});
+		else callback();
+	};
+
+	this.isOldEnoughToUpvote = function(callback) {
+		var now = new Date();
+		var xDaysAgo = now.getTime() - MIN_DAYS_TO_UPVOTE * 24 * 60 * 60 * 1000;
+
+		var allowed = _this.user.joindate < xDaysAgo;
+		if (!allowed) callback({'reason': 'notOldEnough'});
+		else callback();
+	};
+
+	this.hasVotedTooManyPostsInThread = function(callback) {
+		countVotesInThread(_this.user.id, _this.post.tid, function(err, userVotesInThread) {
+			if (err) {
+				err.reason = 'Unknown';
+				callback(err);
+			}
+
+			var allowed = userVotesInThread >= MAX_VOTES_PER_THREAD;
+			if (!allowed) callback({'reason': 'tooManyVotesInThread'});
+			else callback();
+		});
+	};
+
+	this.hasEnoughPostsToDownvote = function(callback) {
+		var allowed = _this.user.postcount > MIN_POSTS_TO_DOWNVOTE;
+		if (!allowed) callback({'reason': 'notEnoughPosts'});
+		else callback();
+	};
+
+	this.isOldEnoughToDownvote = function(callback) {
+		var now = new Date();
+		var xDaysAgo = now.getTime() - MIN_DAYS_TO_DOWNVOTE * 24 * 60 * 60 * 1000;
+
+		var allowed = _this.user.joindate < xDaysAgo;
+		if (!allowed) callback({'reason': 'notOldEnough'});
+		else callback();
+	};
+
+	this.hasEnoughReputationToDownvote = function(callback) {
+		var allowed = _this.user.reputation > MIN_REPUTATION_TO_DOWNVOTE;
+		if (!allowed) callback({'reason': 'notEnoughPosts'});
+		else callback();
+	};
+
+	function countVotesInThread(userId, threadId, callback) {
+		callback(0); //TODO implement
+	}
+};
 
 var ReputationManager = function() {
 	var _this = this;
-	var rules = {};
 
-	this.userCanUpvotePost = function(user, post) {
-		if (!hasEnoughPostsToUpvote(user.postcount)) {
-			return false;
-		}
+	this.userCanUpvotePost = function(user, post, callback) {
+		var userPermissions = new UserVotingPermissions(user, post);
 
-		if (!isOldEnoughToUpvote(user.joindate)) {
-			return false;
-		}
+		async.series([
+				userPermissions.hasEnoughPostsToUpvote,
+				userPermissions.isOldEnoughToUpvote,
+				userPermissions.hasVotedTooManyPostsInThread
+			],
+			function(err, results){
+				if (err) {
+					callback({
+						'allowed': false,
+						'reason': err.reason
+					});
+					return;
+				}
 
-		return true;
+				callback({
+					'allowed': true
+				});
+			});
 	};
 
-	this.userCanDownvotePost = function(user, post) {
-		if (!hasEnoughPostsToDownvote(user.postcount)) {
-			return false;
-		}
+	this.userCanDownvotePost = function(user, post, callback) {
+		var userPermissions = new UserVotingPermissions(user, post);
 
-		if (!isOldEnoughToDownvote(user.joindate)) {
-			return false;
-		}
+		async.series([
+				userPermissions.hasEnoughPostsToDownvote,
+				userPermissions.isOldEnoughToDownvote,
+				userPermissions.hasEnoughReputationToDownvote
+			],
+			function(err, results){
+				if (err) {
+					callback({
+						'allowed': false,
+						'reason': err.reason
+					});
+					return;
+				}
 
-		if (!hasEnoughReputationToDownvote(user.reputation)) {
-			return false;
-		}
-
-		return true;
+				callback({
+					'allowed': true
+				});
+			});
 	};
 
 	this.calculateUpvoteWeight = function(user) {
@@ -131,29 +180,5 @@ var ReputationManager = function() {
 		});
 	};
 };
-
-function hasEnoughPostsToUpvote(postcount) {
-	return postcount > MIN_POSTS_TO_UPVOTE;
-}
-
-function isOldEnoughToUpvote(registrationTimestamp) {
-	var now = new Date();
-	var xDaysAgo = now.getTime() - MIN_DAYS_TO_UPVOTE * 24 * 60 * 60 * 1000;
-	return registrationTimestamp < xDaysAgo;
-}
-
-function hasEnoughPostsToDownvote(postcount) {
-	return postcount > MIN_POSTS_TO_DOWNVOTE;
-}
-
-function isOldEnoughToDownvote(registrationTimestamp) {
-	var now = new Date();
-	var xDaysAgo = now.getTime() - MIN_DAYS_TO_DOWNVOTE * 24 * 60 * 60 * 1000;
-	return registrationTimestamp < xDaysAgo;
-}
-
-function hasEnoughReputationToDownvote(reputation) {
-	return reputation > MIN_REPUTATION_TO_DOWNVOTE;
-}
 
 module.exports = ReputationManager;
