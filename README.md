@@ -36,3 +36,7 @@ Upvotes give extra reputation depending on the user who is voting:
 Undoing votes:  
  - undoing an upvote should remove extra reputation awarded when upvote was given (extra rep should not be recalculated)
  - undoing a downvote should give +1 to voter (and also +1 to post author, but that's something NodeBB already takes cares of)
+
+### (TO-DO)
+Show alert when the user can not vote
+Make internationalization of the plugin
