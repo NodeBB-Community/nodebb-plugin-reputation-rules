@@ -40,3 +40,4 @@ Undoing votes:
 ### (TO-DO)
 Show alert when the user can not vote
 Make internationalization of the plugin
+Make admin panel instead of set min/max values on file
