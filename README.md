@@ -38,6 +38,6 @@ Undoing votes:
  - undoing a downvote should give +1 to voter (and also +1 to post author, but that's something NodeBB already takes cares of)
 
 ### (TO-DO)
-Show alert when the user can not vote
-Make internationalization of the plugin
-Make admin panel instead of set min/max values on file
+- Show alert when the user can not vote
+- Make internationalization of the plugin
+- Make admin panel instead of set min/max values on file
