@@ -35,7 +35,7 @@ var UserVotingPermissions = function(user, post) {
 	};
 
 	this.hasVotedTooManyPostsInThread = function(callback) {
-		countVotesInThread(_this.user.id, _this.post.tid, function(err, userVotesInThread) {
+		countVotesInThread(_this.user.uid, _this.post.tid, function(err, userVotesInThread) {
 			if (err) {
 				err.reason = 'Unknown';
 				callback(err);
@@ -69,7 +69,17 @@ var UserVotingPermissions = function(user, post) {
 	};
 
 	function countVotesInThread(userId, threadId, callback) {
-		callback(0); //TODO implement
+		var voteIdentifier = REP_LOG_NAMESPACE + ":" + userId + ":.*:" + threadId + ":.*";
+		//console.log("vote identifier to search: " + voteIdentifier);
+		db.getObjects([new RegExp(voteIdentifier, 'g')], function(err, votesInThread) {
+			if (err) {
+				console.log(err);
+				callback(err);
+				return;
+			}
+			console.log(votesInThread);
+			callback(null, votesInThread.length || 0);
+		});
 	}
 };
 
