@@ -69,16 +69,13 @@ var UserVotingPermissions = function(user, post) {
 	};
 
 	function countVotesInThread(userId, threadId, callback) {
-		var voteIdentifier = REP_LOG_NAMESPACE + ":" + userId + ":.*:" + threadId + ":.*";
-		//console.log("vote identifier to search: " + voteIdentifier);
-		db.getObjects([new RegExp(voteIdentifier, 'g')], function(err, votesInThread) {
+		var voteIdentifier = REP_LOG_NAMESPACE + ":user:" + userId + ":thread:" + threadId;
+		db.getSetMembers(voteIdentifier, function(err, setMembers) {
 			if (err) {
-				console.log(err);
 				callback(err);
 				return;
 			}
-			console.log(votesInThread);
-			callback(null, votesInThread.length || 0);
+			callback(null, setMembers.length);
 		});
 	}
 };
@@ -139,7 +136,7 @@ var ReputationManager = function() {
 	};
 
 	this.logVote = function(vote, callback) {
-		var voteIdentifier = REP_LOG_NAMESPACE + ":"
+		var mainKey = REP_LOG_NAMESPACE + ":"
 			+ vote.voterId + ":"
 			+ vote.authorId + ":"
 			+ vote.topicId + ":"
@@ -147,17 +144,23 @@ var ReputationManager = function() {
 
 		vote.undone = false;
 
-		db.setObject(voteIdentifier, vote, function(err) {
-			if (err) {
-				if (callback) callback(err);
-				return;
-			}
-			if (callback) callback(null, vote);
-		});
+		//save main object and its key in secondary sets
+		var threadKey = REP_LOG_NAMESPACE + ":user:" + vote.voterId + ":thread:" + vote.topicId;
+		async.series([
+				saveMainVoteLog.bind({'key': mainKey, 'value': vote}),
+				saveThreadVoteLog.bind({'key': threadKey, 'value': mainKey})
+			],
+			function(err, results) {
+				if (err) {
+					callback(err);
+					return;
+				}
+				callback(null, vote);
+			});
 	};
 
 	this.logVoteUndone = function(vote, callback) {
-		var voteIdentifier = REP_LOG_NAMESPACE + ":"
+		var mainKey = REP_LOG_NAMESPACE + ":"
 			+ vote.voterId + ":"
 			+ vote.authorId + ":"
 			+ vote.topicId + ":"
@@ -165,13 +168,19 @@ var ReputationManager = function() {
 
 		vote.undone = true;
 
-		db.setObjectField(voteIdentifier, 'undone', true, function(err) {
-			if (err) {
-				if (callback) callback(err);
-				return;
-			}
-			if (callback) callback(null, vote);
-		});
+		//update main object and remove its key from secondary sets
+		var threadKey = REP_LOG_NAMESPACE + ":user:" + vote.voterId + ":thread:" + vote.topicId;
+		async.series([
+				updateMainVoteLog.bind({'key': mainKey, 'field': 'undone', 'value': true}),
+				removeThreadVoteLog.bind({'key': threadKey, 'value': mainKey})
+			],
+			function(err, results) {
+				if (err) {
+					callback(err);
+					return;
+				}
+				callback(null, vote);
+			});
 	};
 
 	this.findVoteLog = function(user, author, post, callback) {
@@ -189,6 +198,59 @@ var ReputationManager = function() {
 			if (callback) callback(null, vote);
 		});
 	};
+
+	//needs this.key and this.value as context
+	function saveMainVoteLog(callback) {
+		var key = this.key,
+			value = this.value;
+		db.setObject(key, value, function(err) {
+			if (err) {
+				callback(err);
+				return;
+			}
+			callback(null, value);
+		});
+	}
+
+	//needs this.key, this.field and this.value as context
+	function updateMainVoteLog(callback) {
+		var key = this.key,
+			field = this.field,
+			value = this.value;
+		db.setObjectField(key, field, value, function(err) {
+			if (err) {
+				callback(err);
+				return;
+			}
+			callback(null);
+		});
+	}
+
+	//needs this.key and this.value as context
+	function saveThreadVoteLog(callback) {
+		var key = this.key,
+			value = this.value;
+		db.setAdd(key, value, function(err) {
+			if (err) {
+				callback(err);
+				return;
+			}
+			callback(null, value);
+		});
+	}
+
+	//needs this.key and this.value as context
+	function removeThreadVoteLog(callback) {
+		var key = this.key,
+			value = this.value;
+		db.setRemove(key, value, function(err) {
+			if (err) {
+				callback(err);
+				return;
+			}
+			callback(null);
+		});
+	}
 };
 
 module.exports = ReputationManager;

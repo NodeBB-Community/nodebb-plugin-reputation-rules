@@ -242,12 +242,16 @@ function undoDownvote(user, callback) {
 }
 
 function decreaseUserReputation(uid, amount, callback) {
-	if (amount >= 0) callback();
+	if (amount >= 0) {
+		callback();
+		return;
+	}
 
-	console.log("increase user's reputation (" + uid + ") by " + amount);
+	console.log("decrease user's reputation (" + uid + ") by " + amount);
 	users.decrementUserFieldBy(uid, 'reputation', amount, function (err, newreputation) {
 		if (err) {
-			return callback(err);
+			callback(err);
+			return;
 		}
 
 		db.sortedSetAdd('users:reputation', newreputation, uid);
@@ -259,12 +263,16 @@ function decreaseUserReputation(uid, amount, callback) {
 }
 
 function increaseUserReputation(uid, amount, callback) {
-	if (amount <= 0) callback();
+	if (amount <= 0) {
+		callback();
+		return;
+	}
 
 	console.log("increase user's reputation (" + uid + ") by " + amount);
 	users.incrementUserFieldBy(uid, 'reputation', amount, function (err, newreputation) {
 		if (err) {
-			return callback(err);
+			callback(err);
+			return;
 		}
 
 		db.sortedSetAdd('users:reputation', newreputation, uid);
