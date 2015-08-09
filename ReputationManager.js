@@ -41,7 +41,7 @@ var UserVotingPermissions = function(user, post) {
 				callback(err);
 			}
 
-			var allowed = userVotesInThread >= MAX_VOTES_PER_THREAD;
+			var allowed = userVotesInThread < MAX_VOTES_PER_THREAD;
 			if (!allowed) callback({'reason': 'tooManyVotesInThread'});
 			else callback();
 		});

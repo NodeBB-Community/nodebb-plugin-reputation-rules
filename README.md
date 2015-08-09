@@ -25,7 +25,7 @@ Reputation can be disabled in certain subforums
 ### (TO-DO) Rule #6 
 A user cannot vote the same person twice in a month
 
-### (TO-DO) Rule #7 
+### Rule #7 
 A user cannot vote more than 5 messages in the same thread
 
 ### Rule #8 
