@@ -229,7 +229,6 @@ function undoUpvote(user, author, post, callback) {
 			return;
 		}
 
-		console.dir(voteLog);
 		var amount = voteLog.amount;
 		//decrease author's rep -extra
 		decreaseUserReputation(author.uid, amount, callback);

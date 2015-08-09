@@ -22,7 +22,7 @@ One user can't vote (up or down) more than `X` times a day, being `X = reputatio
 ### (TO-DO) Rule #5 
 Reputation can be disabled in certain subforums
 
-### (TO-DO) Rule #6 
+### Rule #6 
 A user cannot vote the same person twice in a month
 
 ### Rule #7 

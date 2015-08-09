@@ -35,6 +35,19 @@ var UserVotingPermissions = function(db, user, post) {
         });
     };
 
+    this.hasVotedAuthorTooManyTimes = function(callback) {
+        countVotesToAuthor(_this.user.uid, _this.post.uid, function(err, votesToAuthor) {
+            if (err) {
+                err.reason = 'Unknown';
+                callback(err);
+            }
+
+            var allowed = votesToAuthor < Config.maxVotesToSameUserInMonth();
+            if (!allowed) callback({'reason': 'tooManyVotesToSameUserThisMonth'});
+            else callback();
+        });
+    };
+
     this.hasEnoughPostsToDownvote = function(callback) {
         var allowed = _this.user.postcount > Config.minPostToDownvote();
         if (!allowed) callback({'reason': 'notEnoughPosts'});
@@ -57,7 +70,18 @@ var UserVotingPermissions = function(db, user, post) {
     };
 
     function countVotesInThread(userId, threadId, callback) {
-        var voteIdentifier = Config.reputationLogNamespace() + ":user:" + userId + ":thread:" + threadId;
+        var voteIdentifier = Config.getPerThreadLogId(userId, threadId);
+        db.getSetMembers(voteIdentifier, function(err, setMembers) {
+            if (err) {
+                callback(err);
+                return;
+            }
+            callback(null, setMembers.length);
+        });
+    }
+
+    function countVotesToAuthor(userId, authorId, callback) {
+        var voteIdentifier = Config.getPerAuthorLogId(userId, authorId);
         db.getSetMembers(voteIdentifier, function(err, setMembers) {
             if (err) {
                 callback(err);
