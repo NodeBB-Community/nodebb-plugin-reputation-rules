@@ -1,97 +1,20 @@
 'use strict';
 
 var db = module.parent.parent.require('./database'),
-	async = require('async');
-
-var MIN_POSTS_TO_UPVOTE = 20;
-var MIN_DAYS_TO_UPVOTE = 7;
-
-var MIN_POSTS_TO_DOWNVOTE = 50;
-var MIN_DAYS_TO_DOWNVOTE = 15;
-var MIN_REPUTATION_TO_DOWNVOTE = 10;
-
-var MAX_VOTES_PER_THREAD = 5;
-
-var REP_LOG_NAMESPACE = "reputationLog";
-
-var UserVotingPermissions = function(user, post) {
-	var _this = this;
-	this.user = user;
-	this.post = post;
-
-	this.hasEnoughPostsToUpvote = function(callback) {
-		var allowed = _this.user.postcount > MIN_POSTS_TO_UPVOTE;
-		if (!allowed) callback({'reason': 'notEnoughPosts'});
-		else callback();
-	};
-
-	this.isOldEnoughToUpvote = function(callback) {
-		var now = new Date();
-		var xDaysAgo = now.getTime() - MIN_DAYS_TO_UPVOTE * 24 * 60 * 60 * 1000;
-
-		var allowed = _this.user.joindate < xDaysAgo;
-		if (!allowed) callback({'reason': 'notOldEnough'});
-		else callback();
-	};
-
-	this.hasVotedTooManyPostsInThread = function(callback) {
-		countVotesInThread(_this.user.uid, _this.post.tid, function(err, userVotesInThread) {
-			if (err) {
-				err.reason = 'Unknown';
-				callback(err);
-			}
-
-			var allowed = userVotesInThread < MAX_VOTES_PER_THREAD;
-			if (!allowed) callback({'reason': 'tooManyVotesInThread'});
-			else callback();
-		});
-	};
-
-	this.hasEnoughPostsToDownvote = function(callback) {
-		var allowed = _this.user.postcount > MIN_POSTS_TO_DOWNVOTE;
-		if (!allowed) callback({'reason': 'notEnoughPosts'});
-		else callback();
-	};
-
-	this.isOldEnoughToDownvote = function(callback) {
-		var now = new Date();
-		var xDaysAgo = now.getTime() - MIN_DAYS_TO_DOWNVOTE * 24 * 60 * 60 * 1000;
-
-		var allowed = _this.user.joindate < xDaysAgo;
-		if (!allowed) callback({'reason': 'notOldEnough'});
-		else callback();
-	};
-
-	this.hasEnoughReputationToDownvote = function(callback) {
-		var allowed = _this.user.reputation > MIN_REPUTATION_TO_DOWNVOTE;
-		if (!allowed) callback({'reason': 'notEnoughPosts'});
-		else callback();
-	};
-
-	function countVotesInThread(userId, threadId, callback) {
-		var voteIdentifier = REP_LOG_NAMESPACE + ":user:" + userId + ":thread:" + threadId;
-		db.getSetMembers(voteIdentifier, function(err, setMembers) {
-			if (err) {
-				callback(err);
-				return;
-			}
-			callback(null, setMembers.length);
-		});
-	}
-};
+	async = require('async'),
+	Config = require('./Config.js'),
+	UserVotingPermissions = require('./UserVotingPermissions.js');
 
 var ReputationManager = function() {
-	var _this = this;
-
 	this.userCanUpvotePost = function(user, post, callback) {
-		var userPermissions = new UserVotingPermissions(user, post);
+		var userPermissions = new UserVotingPermissions(db, user, post);
 
 		async.series([
 				userPermissions.hasEnoughPostsToUpvote,
 				userPermissions.isOldEnoughToUpvote,
 				userPermissions.hasVotedTooManyPostsInThread
 			],
-			function(err, results){
+			function(err){
 				if (err) {
 					callback({
 						'allowed': false,
@@ -107,14 +30,14 @@ var ReputationManager = function() {
 	};
 
 	this.userCanDownvotePost = function(user, post, callback) {
-		var userPermissions = new UserVotingPermissions(user, post);
+		var userPermissions = new UserVotingPermissions(db, user, post);
 
 		async.series([
 				userPermissions.hasEnoughPostsToDownvote,
 				userPermissions.isOldEnoughToDownvote,
 				userPermissions.hasEnoughReputationToDownvote
 			],
-			function(err, results){
+			function(err){
 				if (err) {
 					callback({
 						'allowed': false,
@@ -136,7 +59,7 @@ var ReputationManager = function() {
 	};
 
 	this.logVote = function(vote, callback) {
-		var mainKey = REP_LOG_NAMESPACE + ":"
+		var mainKey = Config.reputationLogNamespace() + ":"
 			+ vote.voterId + ":"
 			+ vote.authorId + ":"
 			+ vote.topicId + ":"
@@ -145,7 +68,7 @@ var ReputationManager = function() {
 		vote.undone = false;
 
 		//save main object and its key in secondary sets
-		var threadKey = REP_LOG_NAMESPACE + ":user:" + vote.voterId + ":thread:" + vote.topicId;
+		var threadKey = Config.reputationLogNamespace() + ":user:" + vote.voterId + ":thread:" + vote.topicId;
 		async.series([
 				saveMainVoteLog.bind(null, mainKey, vote),
 				saveThreadVoteLog.bind(null, threadKey, mainKey)
@@ -160,7 +83,7 @@ var ReputationManager = function() {
 	};
 
 	this.logVoteUndone = function(vote, callback) {
-		var mainKey = REP_LOG_NAMESPACE + ":"
+		var mainKey = Config.reputationLogNamespace() + ":"
 			+ vote.voterId + ":"
 			+ vote.authorId + ":"
 			+ vote.topicId + ":"
@@ -169,7 +92,7 @@ var ReputationManager = function() {
 		vote.undone = true;
 
 		//update main object and remove its key from secondary sets
-		var threadKey = REP_LOG_NAMESPACE + ":user:" + vote.voterId + ":thread:" + vote.topicId;
+		var threadKey = Config.reputationLogNamespace() + ":user:" + vote.voterId + ":thread:" + vote.topicId;
 		async.series([
 				updateMainVoteLog.bind(null, mainKey, 'undone', true),
 				removeThreadVoteLog.bind(null, threadKey, mainKey)
@@ -184,7 +107,7 @@ var ReputationManager = function() {
 	};
 
 	this.findVoteLog = function(user, author, post, callback) {
-		var voteIdentifier = REP_LOG_NAMESPACE + ":"
+		var voteIdentifier = Config.reputationLogNamespace() + ":"
 			+ user.uid + ":"
 			+ author.uid + ":"
 			+ post.tid + ":"
