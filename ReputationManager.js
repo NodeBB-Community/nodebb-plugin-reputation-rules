@@ -147,8 +147,8 @@ var ReputationManager = function() {
 		//save main object and its key in secondary sets
 		var threadKey = REP_LOG_NAMESPACE + ":user:" + vote.voterId + ":thread:" + vote.topicId;
 		async.series([
-				saveMainVoteLog.bind({'key': mainKey, 'value': vote}),
-				saveThreadVoteLog.bind({'key': threadKey, 'value': mainKey})
+				saveMainVoteLog.bind(null, mainKey, vote),
+				saveThreadVoteLog.bind(null, threadKey, mainKey)
 			],
 			function(err, results) {
 				if (err) {
@@ -171,8 +171,8 @@ var ReputationManager = function() {
 		//update main object and remove its key from secondary sets
 		var threadKey = REP_LOG_NAMESPACE + ":user:" + vote.voterId + ":thread:" + vote.topicId;
 		async.series([
-				updateMainVoteLog.bind({'key': mainKey, 'field': 'undone', 'value': true}),
-				removeThreadVoteLog.bind({'key': threadKey, 'value': mainKey})
+				updateMainVoteLog.bind(null, mainKey, 'undone', true),
+				removeThreadVoteLog.bind(null, threadKey, mainKey)
 			],
 			function(err, results) {
 				if (err) {
@@ -199,10 +199,7 @@ var ReputationManager = function() {
 		});
 	};
 
-	//needs this.key and this.value as context
-	function saveMainVoteLog(callback) {
-		var key = this.key,
-			value = this.value;
+	function saveMainVoteLog(key, value, callback) {
 		db.setObject(key, value, function(err) {
 			if (err) {
 				callback(err);
@@ -212,11 +209,7 @@ var ReputationManager = function() {
 		});
 	}
 
-	//needs this.key, this.field and this.value as context
-	function updateMainVoteLog(callback) {
-		var key = this.key,
-			field = this.field,
-			value = this.value;
+	function updateMainVoteLog(key, field, value, callback) {
 		db.setObjectField(key, field, value, function(err) {
 			if (err) {
 				callback(err);
@@ -226,10 +219,7 @@ var ReputationManager = function() {
 		});
 	}
 
-	//needs this.key and this.value as context
-	function saveThreadVoteLog(callback) {
-		var key = this.key,
-			value = this.value;
+	function saveThreadVoteLog(key, value, callback) {
 		db.setAdd(key, value, function(err) {
 			if (err) {
 				callback(err);
@@ -239,10 +229,7 @@ var ReputationManager = function() {
 		});
 	}
 
-	//needs this.key and this.value as context
-	function removeThreadVoteLog(callback) {
-		var key = this.key,
-			value = this.value;
+	function removeThreadVoteLog(key, value, callback) {
 		db.setRemove(key, value, function(err) {
 			if (err) {
 				callback(err);
