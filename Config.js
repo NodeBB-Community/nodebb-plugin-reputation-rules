@@ -41,7 +41,7 @@ var Config = {
     },
     getPerAuthorLogId: function(voterId, authorId) {
         var now = new Date();
-        var month = now.getMonth() + "-" + now.getFullYear();
+        var month = (now.getMonth()+1) + "-" + now.getFullYear();
         return REP_LOG_NAMESPACE + ":user:" + voterId + ":author:" + authorId + ":month:" + month;
     }
 };
