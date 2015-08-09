@@ -35,7 +35,7 @@ var UserVotingPermissions = function(db, user, post) {
         });
     };
 
-    this.hasVotedAuthorTooManyTimes = function(callback) {
+    this.hasVotedAuthorTooManyTimesThisMonth = function(callback) {
         countVotesToAuthor(_this.user.uid, _this.post.uid, function(err, votesToAuthor) {
             if (err) {
                 err.reason = 'Unknown';
@@ -44,6 +44,19 @@ var UserVotingPermissions = function(db, user, post) {
 
             var allowed = votesToAuthor < Config.maxVotesToSameUserInMonth();
             if (!allowed) callback({'reason': 'tooManyVotesToSameUserThisMonth'});
+            else callback();
+        });
+    };
+
+    this.hasVotedTooManyTimesToday = function(callback) {
+        countVotesForUser(_this.user.uid, function (err, votes) {
+            if (err) {
+                err.reason = 'Unknown';
+                callback(err);
+            }
+
+            var allowed = votes < Config.maxVotesPerUser(_this.user.reputation);
+            if (!allowed) callback({'reason': 'tooManyVotesToday'});
             else callback();
         });
     };
@@ -82,6 +95,17 @@ var UserVotingPermissions = function(db, user, post) {
 
     function countVotesToAuthor(userId, authorId, callback) {
         var voteIdentifier = Config.getPerAuthorLogId(userId, authorId);
+        db.getSetMembers(voteIdentifier, function(err, setMembers) {
+            if (err) {
+                callback(err);
+                return;
+            }
+            callback(null, setMembers.length);
+        });
+    }
+
+    function countVotesForUser(userId, callback) {
+        var voteIdentifier = Config.getPerUserLogId(userId);
         db.getSetMembers(voteIdentifier, function(err, setMembers) {
             if (err) {
                 callback(err);

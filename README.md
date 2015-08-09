@@ -16,7 +16,7 @@
 ### Rule #3 
 Downvoting costs 1 reputation (user who votes loses 1 reputation)
 
-### (TO-DO) Rule #4 
+### Rule #4 
 One user can't vote (up or down) more than `X` times a day, being `X = reputation/10`. With a minimum of 5 and a max of 50
 
 ### (TO-DO) Rule #5 

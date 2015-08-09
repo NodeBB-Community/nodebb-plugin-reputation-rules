@@ -13,7 +13,8 @@ var ReputationManager = function() {
 				userPermissions.hasEnoughPostsToUpvote,
 				userPermissions.isOldEnoughToUpvote,
 				userPermissions.hasVotedTooManyPostsInThread,
-				userPermissions.hasVotedAuthorTooManyTimes
+				userPermissions.hasVotedAuthorTooManyTimesThisMonth,
+				userPermissions.hasVotedTooManyTimesToday
 			],
 			function(err){
 				if (err) {
@@ -36,7 +37,10 @@ var ReputationManager = function() {
 		async.series([
 				userPermissions.hasEnoughPostsToDownvote,
 				userPermissions.isOldEnoughToDownvote,
-				userPermissions.hasEnoughReputationToDownvote
+				userPermissions.hasEnoughReputationToDownvote,
+				userPermissions.hasVotedTooManyPostsInThread,
+				userPermissions.hasVotedAuthorTooManyTimesThisMonth,
+				userPermissions.hasVotedTooManyTimesToday
 			],
 			function(err){
 				if (err) {
@@ -66,7 +70,8 @@ var ReputationManager = function() {
 		async.series([
 				saveMainVoteLog.bind(null, vote),
 				saveThreadVoteLog.bind(null, vote),
-				saveAuthorVoteLog.bind(null, vote)
+				saveAuthorVoteLog.bind(null, vote),
+				saveUserVoteLog.bind(null, vote)
 			],
 			function(err) {
 				if (err) {
@@ -84,7 +89,8 @@ var ReputationManager = function() {
 		async.series([
 				updateMainVoteLog.bind(null, vote, 'undone', true),
 				removeThreadVoteLog.bind(null, vote),
-				removeAuthorVoteLog.bind(null, vote)
+				removeAuthorVoteLog.bind(null, vote),
+				removeUserVoteLog.bind(null, vote)
 			],
 			function(err) {
 				if (err) {
@@ -100,10 +106,10 @@ var ReputationManager = function() {
 		var voteIdentifier = Config.getMainLogId(user.uid, author.uid, post.tid, post.pid);
 		db.getObject(voteIdentifier, function(err, vote) {
 			if (err) {
-				if (callback) callback(err);
+				callback(err);
 				return;
 			}
-			if (callback) callback(null, vote);
+			callback(null, vote);
 		});
 	};
 
@@ -141,6 +147,12 @@ var ReputationManager = function() {
 		setAdd(key, value, callback);
 	}
 
+	function saveUserVoteLog(vote, callback) {
+		var key = Config.getPerUserLogId(vote.voterId);
+		var value = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
+		setAdd(key, value, callback);
+	}
+
 	function removeThreadVoteLog(vote, callback) {
 		var key = Config.getPerThreadLogId(vote.voterId, vote.topicId);
 		var value = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
@@ -149,6 +161,12 @@ var ReputationManager = function() {
 
 	function removeAuthorVoteLog(vote, callback) {
 		var key = Config.getPerAuthorLogId(vote.voterId, vote.authorId);
+		var value = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
+		setRemove(key, value, callback);
+	}
+
+	function removeUserVoteLog(vote, callback) {
+		var key = Config.getPerUserLogId(vote.voterId);
 		var value = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
 		setRemove(key, value, callback);
 	}

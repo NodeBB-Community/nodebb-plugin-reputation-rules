@@ -29,6 +29,17 @@ var Config = {
     maxVotesToSameUserInMonth: function() {
         return MAX_VOTES_TO_SAME_USER_PER_MONTH;
     },
+    maxVotesPerUser: function(reputation) {
+        var MIN = 5,
+            MAX = 50;
+        var calculatedVotesPerUser = Math.floor(reputation/10);
+        if (calculatedVotesPerUser < MIN) {
+            calculatedVotesPerUser = MIN;
+        } else if (calculatedVotesPerUser > MAX) {
+            calculatedVotesPerUser = MAX;
+        }
+        return calculatedVotesPerUser;
+    },
     getMainLogId: function(voterId, authorId, topicId, postId) {
         return REP_LOG_NAMESPACE + ":"
             + voterId + ":"
@@ -43,6 +54,11 @@ var Config = {
         var now = new Date();
         var month = (now.getMonth()+1) + "-" + now.getFullYear();
         return REP_LOG_NAMESPACE + ":user:" + voterId + ":author:" + authorId + ":month:" + month;
+    },
+    getPerUserLogId: function(voterId) {
+        var now = new Date();
+        var today = now.getDate() + "-" + (now.getMonth()+1) + "-" + now.getFullYear();
+        return REP_LOG_NAMESPACE + ":user:" + voterId + ":day:" + today;
     }
 };
 
