@@ -82,6 +82,14 @@ var UserVotingPermissions = function(db, user, post) {
         else callback();
     };
 
+    this.votingAllowedInCategory = function(callback) {
+        var categoryBlackList = Config.getDisabledCategories();
+        var index = categoryBlackList.indexOf(_this.post.cid);
+        var allowed = index === -1;
+        if (!allowed) callback({'reason': 'votingDisabledInCategory'});
+        else callback();
+    };
+
     function countVotesInThread(userId, threadId, callback) {
         var voteIdentifier = Config.getPerThreadLogId(userId, threadId);
         db.getSetMembers(voteIdentifier, function(err, setMembers) {

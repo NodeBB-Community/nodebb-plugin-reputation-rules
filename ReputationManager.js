@@ -10,6 +10,7 @@ var ReputationManager = function() {
 		var userPermissions = new UserVotingPermissions(db, user, post);
 
 		async.series([
+				userPermissions.votingAllowedInCategory,
 				userPermissions.hasEnoughPostsToUpvote,
 				userPermissions.isOldEnoughToUpvote,
 				userPermissions.hasVotedTooManyPostsInThread,
@@ -35,6 +36,7 @@ var ReputationManager = function() {
 		var userPermissions = new UserVotingPermissions(db, user, post);
 
 		async.series([
+				userPermissions.votingAllowedInCategory,
 				userPermissions.hasEnoughPostsToDownvote,
 				userPermissions.isOldEnoughToDownvote,
 				userPermissions.hasEnoughReputationToDownvote,

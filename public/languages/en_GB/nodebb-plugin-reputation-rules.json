@@ -1,4 +1,5 @@
 {
+  "votingDisabledInCategory": "Voting has been disabled in this category",
   "notEnoughPosts": "Not enough messages to vote",
   "notOldEnough": "You are not an old enough member of this forum",
   "tooManyVotesInThread": "You can't vote more messages in this thread",

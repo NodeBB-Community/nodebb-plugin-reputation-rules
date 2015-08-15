@@ -5,7 +5,8 @@ var MIN_POSTS_TO_UPVOTE = 20,
     MIN_REPUTATION_TO_DOWNVOTE = 10,
     MAX_VOTES_PER_USER_AND_THREAD = 5,
     MAX_VOTES_TO_SAME_USER_PER_MONTH = 1,
-    REP_LOG_NAMESPACE = "reputationLog";
+    REP_LOG_NAMESPACE = "reputationLog",
+    DISABLED_CATEGORIES_IDS = [];
 
 var Config = {
     minPostToDownvote: function() {
@@ -59,6 +60,9 @@ var Config = {
         var now = new Date();
         var today = now.getDate() + "-" + (now.getMonth()+1) + "-" + now.getFullYear();
         return REP_LOG_NAMESPACE + ":user:" + voterId + ":day:" + today;
+    },
+    getDisabledCategories: function() {
+        return DISABLED_CATEGORIES_IDS;
     }
 };
 

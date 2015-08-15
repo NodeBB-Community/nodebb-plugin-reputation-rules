@@ -49,11 +49,23 @@ var ReputationParams = function(userId, postId) {
 		});
 	};
 
+	this.findCategory = function(callback) {
+		Posts.getCidByPid(_this.postId, function(err, cid) {
+			if (err) {
+				callback(err);
+				return;
+			}
+
+			callback(null, cid);
+		});
+	};
+
 	this.recoverParams = function(callback) {
 		async.series([
 			_this.findUser,
 			_this.findPost,
-			_this.findAuthor
+			_this.findAuthor,
+			_this.findCategory
 		], function(err, data) {
 			if (err) {
 				console.log('[nodebb-reputation-rules] Error on ReputationParams async calls: ' + err.message);
@@ -64,6 +76,7 @@ var ReputationParams = function(userId, postId) {
 			params.user = data[0];
 			params.post = data[1];
 			params.author = data[2];
+			params.post.cid = parseInt(data[3], 10);
 
 			callback(null, params);
 		});
