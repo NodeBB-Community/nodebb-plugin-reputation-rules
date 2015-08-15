@@ -10,12 +10,12 @@ var plugin = {},
 
 
 plugin.upvote = function(vote) {
-	console.log('[hook:upvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
+	winston.info('[hook:upvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
 	var reputationParams = new ReputationParams(vote.uid, vote.pid);
 	reputationParams.recoverParams(function(err, data) {
 		if (err) {
-			console.log('[nodebb-reputation-rules] Error on downvote hook');
+			winston.error('[nodebb-reputation-rules] Error on downvote hook');
 			return;
 		}
 
@@ -23,7 +23,7 @@ plugin.upvote = function(vote) {
 		if (vote.current === 'downvote') {
 			undoDownvote(data.user, function(err) {
 				if (err) {
-					console.log('[nodebb-reputation-rules] Error undoing downvote');
+					winston.error('[nodebb-reputation-rules] Error undoing downvote');
 				}
 			});
 		}
@@ -34,7 +34,7 @@ plugin.upvote = function(vote) {
 		//give extra points to author!
 		increaseUserReputation(data.author.uid, extraPoints, function(err) {
 			if (err) {
-				console.log('[nodebb-reputation-rules] Error increasing author\'s reputation on upvote');
+				winston.error('[nodebb-reputation-rules] Error increasing author\'s reputation on upvote');
 				return;
 			}
 
@@ -50,8 +50,8 @@ plugin.upvote = function(vote) {
 			};
 			ReputationManager.logVote(voteLog, function(err) {
 				if (err) {
-					console.log('[nodebb-reputation-rules] Error saving vote log: ' + err.message);
-					console.dir(voteLog);
+					winston.error('[nodebb-reputation-rules] Error saving vote log: ' + err.message);
+					winston.error(voteLog);
 				}
 			});
 
@@ -60,12 +60,12 @@ plugin.upvote = function(vote) {
 };
 
 plugin.downvote = function(vote) {
-	console.log('[hook:downvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
+	winston.info('[hook:downvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
 	var reputationParams = new ReputationParams(vote.uid, vote.pid);
 	reputationParams.recoverParams(function(err, data) {
 		if (err) {
-			console.log('[nodebb-reputation-rules] Error on downvote hook');
+			winston.error('[nodebb-reputation-rules] Error on downvote hook');
 			return;
 		}
 
@@ -73,7 +73,7 @@ plugin.downvote = function(vote) {
 		if (vote.current === 'upvote') {
 			undoUpvote(data.user, data.author, data.post, function(err) {
 				if (err) {
-					console.log('[nodebb-reputation-rules] Error undoing upvote');
+					winston.error('[nodebb-reputation-rules] Error undoing upvote');
 				}
 			});
 		}
@@ -81,7 +81,7 @@ plugin.downvote = function(vote) {
 		//and now the downvote: reduce voter's reputation by one
 		decreaseUserReputation(vote.uid, 1, function(err) {
 			if (err) {
-				console.log('[nodebb-reputation-rules] Error on downvote filter hook');
+				winston.error('[nodebb-reputation-rules] Error on downvote filter hook');
 			}
 
 			//log this operation so we can undo it in the future
@@ -96,8 +96,8 @@ plugin.downvote = function(vote) {
 			};
 			ReputationManager.logVote(voteLog, function(err) {
 				if (err) {
-					console.log('[nodebb-reputation-rules] Error saving vote log: ' + err.message);
-					console.dir(voteLog);
+					winston.error('[nodebb-reputation-rules] Error saving vote log: ' + err.message);
+					winston.error(voteLog);
 				}
 			});
 		});
@@ -105,7 +105,7 @@ plugin.downvote = function(vote) {
 };
 
 plugin.unvote = function(vote) {
-	console.log('[hook:unvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
+	winston.info('[hook:unvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
 	/* how to undo a vote:
 		CASE upvote: reduce author's reputation in case he won extra points when upvoted
@@ -114,7 +114,7 @@ plugin.unvote = function(vote) {
 	var reputationParams = new ReputationParams(vote.uid, vote.pid);
 	reputationParams.recoverParams(function(err, data) {
 		if (err) {
-			console.log('[nodebb-reputation-rules] Error on unvote hook');
+			winston.error('[nodebb-reputation-rules] Error on unvote hook');
 			return;
 		}
 
@@ -128,28 +128,28 @@ plugin.unvote = function(vote) {
 		if (vote.current === 'downvote') {
 			undoDownvote(data.user, function(err) {
 				if (err) {
-					console.log('[nodebb-reputation-rules] Error undoing downvote');
+					winston.error('[nodebb-reputation-rules] Error undoing downvote');
 					return;
 				}
 
 				ReputationManager.logVoteUndone(voteLogIdentifier, function(err) {
 					if (err) {
-						console.log('[nodebb-reputation-rules] Error updating vote log: ' + err.message);
-						console.dir(voteLogIdentifier);
+						winston.error('[nodebb-reputation-rules] Error updating vote log: ' + err.message);
+						winston.error(voteLogIdentifier);
 					}
 				});
 			});
 		} else if (vote.current === 'upvote') {
 			undoUpvote(data.user, data.author, data.post, function(err) {
 				if (err) {
-					console.log('[nodebb-reputation-rules] Error undoing upvote');
+					winston.error('[nodebb-reputation-rules] Error undoing upvote');
 					return;
 				}
 
 				ReputationManager.logVoteUndone(voteLogIdentifier, function(err) {
 					if (err) {
-						console.log('[nodebb-reputation-rules] Error updating vote log: ' + err.message);
-						console.dir(voteLogIdentifier);
+						winston.error('[nodebb-reputation-rules] Error updating vote log: ' + err.message);
+						winston.error(voteLogIdentifier);
 					}
 				});
 			});
@@ -159,22 +159,21 @@ plugin.unvote = function(vote) {
 
 plugin.filterUpvote = function(command, callback) {
 	var vote = getVoteFromCommand(command);
-	console.log('user id: ' + vote.uid + ', post id: ' + vote.pid);
+	winston.info('filter.post.upvote - user id: ' + vote.uid + ', post id: ' + vote.pid);
 
 	var reputationParams = new ReputationParams(vote.uid, vote.pid);
 	reputationParams.recoverParams(function(err, data) {
 		if (err) {
-			console.log('[nodebb-reputation-rules] Error on upvote filter hook');
+			winston.error('[nodebb-reputation-rules] Error on upvote filter hook');
 			callback(new Error('[[error:unknowkn-error]]'));
 			return;
 		}
 
 		ReputationManager.userCanUpvotePost(data.user, data.post, function(result) {
 			if (!result.allowed) {
-				console.log('[nodebb-reputation-rules] upvote not allowed');
+				winston.info('[nodebb-reputation-rules] upvote not allowed');
 				callback(new Error('[[error:' + result.reason + ']]'));
 			} else {
-				console.log('[nodebb-reputation-rules] upvote allowed');
 				callback(null, command);
 			}
 		});
@@ -183,22 +182,21 @@ plugin.filterUpvote = function(command, callback) {
 
 plugin.filterDownvote = function(command, callback) {
 	var vote = getVoteFromCommand(command);
-	console.log('user id: ' + vote.uid + ', post id: ' + vote.pid);
+	winston.info('filter.post.downvote - user id: ' + vote.uid + ', post id: ' + vote.pid);
 
 	var reputationParams = new ReputationParams(vote.uid, vote.pid);
 	reputationParams.recoverParams(function(err, data) {
 		if (err) {
-			console.log('[nodebb-reputation-rules] Error on downvote filter hook');
+			winston.error('[nodebb-reputation-rules] Error on downvote filter hook');
 			callback(new Error('[[error:unknowkn-error]]'));
 			return;
 		}
 
 		ReputationManager.userCanDownvotePost(data.user, data.post, function(result) {
 			if (!result.allowed) {
-				console.log('[nodebb-reputation-rules] downvote not allowed');
+				winston.info('[nodebb-reputation-rules] downvote not allowed');
 				callback(new Error('[[error:' + result.reason + ']]'));
 			} else {
-				console.log('[nodebb-reputation-rules] downvote allowed');
 				callback(null, command);
 			}
 		});
@@ -207,7 +205,7 @@ plugin.filterDownvote = function(command, callback) {
 
 plugin.filterUnvote = function(command, callback) {
 	//unvote is always allowed, isn't it?
-	console.log('filter.post.unvote');
+	winston.info('filter.post.unvote');
 
 	callback(null, command);
 };
@@ -246,7 +244,7 @@ function decreaseUserReputation(uid, amount, callback) {
 		return;
 	}
 
-	console.log("decrease user's reputation (" + uid + ") by " + amount);
+	winston.info("decrease user's reputation (" + uid + ") by " + amount);
 	users.decrementUserFieldBy(uid, 'reputation', amount, function (err, newreputation) {
 		if (err) {
 			callback(err);
@@ -267,7 +265,7 @@ function increaseUserReputation(uid, amount, callback) {
 		return;
 	}
 
-	console.log("increase user's reputation (" + uid + ") by " + amount);
+	winston.info("increase user's reputation (" + uid + ") by " + amount);
 	users.incrementUserFieldBy(uid, 'reputation', amount, function (err, newreputation) {
 		if (err) {
 			callback(err);
