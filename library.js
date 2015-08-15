@@ -5,7 +5,7 @@ var plugin = {},
 	winston = require('winston'),
 	users = module.parent.require('./user'),
 	meta = module.parent.require('./meta'),
-	translator = module.parent.require('../public/src/modules/translator'),
+	translator = require('./translator'),
 	ReputationManager = new (require('./ReputationManager'))(),
 	ReputationParams = require('./ReputationParams');
 
@@ -166,9 +166,8 @@ plugin.filterUpvote = function(command, callback) {
 	reputationParams.recoverParams(function(err, data) {
 		if (err) {
 			winston.error('[nodebb-reputation-rules] Error on upvote filter hook');
-			translator.translate('[[nodebb-plugin-reputation-rules:unknownError]]', 'en_GB', function(translated) {
-				callback(new Error(translated));
-			});
+			var translated = translator.translate('unknownError', 'en_GB');
+			callback(new Error(translated));
 			return;
 		}
 
@@ -176,9 +175,8 @@ plugin.filterUpvote = function(command, callback) {
 			if (!result.allowed) {
 				winston.info('[nodebb-reputation-rules] upvote not allowed');
 				users.getSettings(data.user.uid, function(err, settings) {
-					translator.translate('[[nodebb-plugin-reputation-rules:' + result.reason + ']]', settings.userLang, function(translated) {
-						callback(new Error(translated));
-					});
+					var translated = translator.translate(result.reason, settings.userLang);
+					callback(new Error(translated));
 				});
 			} else {
 				callback(null, command);
@@ -195,9 +193,8 @@ plugin.filterDownvote = function(command, callback) {
 	reputationParams.recoverParams(function(err, data) {
 		if (err) {
 			winston.error('[nodebb-reputation-rules] Error on downvote filter hook');
-			translator.translate('[[nodebb-plugin-reputation-rules:unknownError]]', 'en_GB', function(translated) {
-				callback(new Error(translated));
-			});
+			var translated = translator.translate('unknownError', 'en_GB');
+			callback(new Error(translated));
 			return;
 		}
 
@@ -205,9 +202,8 @@ plugin.filterDownvote = function(command, callback) {
 			if (!result.allowed) {
 				winston.info('[nodebb-reputation-rules] downvote not allowed');
 				users.getSettings(data.user.uid, function(err, settings) {
-					translator.translate('[[nodebb-plugin-reputation-rules:' + result.reason + ']]', settings.userLang, function(translated) {
-						callback(new Error(translated));
-					});
+					var translated = translator.translate(result.reason, settings.userLang);
+					callback(new Error(translated));
 				});
 			} else {
 				callback(null, command);
