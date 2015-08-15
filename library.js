@@ -5,6 +5,7 @@ var plugin = {},
 	winston = require('winston'),
 	users = module.parent.require('./user'),
 	meta = module.parent.require('./meta'),
+	translator = module.parent.require('../public/src/modules/translator'),
 	ReputationManager = new (require('./ReputationManager'))(),
 	ReputationParams = require('./ReputationParams');
 
@@ -165,14 +166,20 @@ plugin.filterUpvote = function(command, callback) {
 	reputationParams.recoverParams(function(err, data) {
 		if (err) {
 			winston.error('[nodebb-reputation-rules] Error on upvote filter hook');
-			callback(new Error('[[error:unknowkn-error]]'));
+			translator.translate('[[nodebb-plugin-reputation-rules:unknownError]]', 'en_GB', function(translated) {
+				callback(new Error(translated));
+			});
 			return;
 		}
 
 		ReputationManager.userCanUpvotePost(data.user, data.post, function(result) {
 			if (!result.allowed) {
 				winston.info('[nodebb-reputation-rules] upvote not allowed');
-				callback(new Error('[[error:' + result.reason + ']]'));
+				users.getSettings(data.user.uid, function(err, settings) {
+					translator.translate('[[nodebb-plugin-reputation-rules:' + result.reason + ']]', settings.userLang, function(translated) {
+						callback(new Error(translated));
+					});
+				});
 			} else {
 				callback(null, command);
 			}
@@ -188,14 +195,20 @@ plugin.filterDownvote = function(command, callback) {
 	reputationParams.recoverParams(function(err, data) {
 		if (err) {
 			winston.error('[nodebb-reputation-rules] Error on downvote filter hook');
-			callback(new Error('[[error:unknowkn-error]]'));
+			translator.translate('[[nodebb-plugin-reputation-rules:unknownError]]', 'en_GB', function(translated) {
+				callback(new Error(translated));
+			});
 			return;
 		}
 
 		ReputationManager.userCanDownvotePost(data.user, data.post, function(result) {
 			if (!result.allowed) {
 				winston.info('[nodebb-reputation-rules] downvote not allowed');
-				callback(new Error('[[error:' + result.reason + ']]'));
+				users.getSettings(data.user.uid, function(err, settings) {
+					translator.translate('[[nodebb-plugin-reputation-rules:' + result.reason + ']]', settings.userLang, function(translated) {
+						callback(new Error(translated));
+					});
+				});
 			} else {
 				callback(null, command);
 			}

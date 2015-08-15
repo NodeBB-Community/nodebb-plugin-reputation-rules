@@ -26,5 +26,7 @@
   ],
   "nbbpm": {
     "compatibility": "^0.7.0"
-  }
+  },
+  "languages": "public/languages",
+  "defaultLang": "en_GB"
 }
