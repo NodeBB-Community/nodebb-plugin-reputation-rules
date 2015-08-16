@@ -87,7 +87,7 @@ require(['settings'], function(settings) {
 
     var wrapper = $("#reputation-rules");
     settings.sync('reputation-rules', wrapper);
-    $('#save').click(function(event) {
+    $('#save').click(function(event){
         event.preventDefault();
         settings.persist('reputation-rules', wrapper, function() {
             socket.emit('admin.settings.syncReputationRules');
