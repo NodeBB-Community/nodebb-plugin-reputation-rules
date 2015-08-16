@@ -7,7 +7,13 @@ var plugin = {},
 	meta = module.parent.require('./meta'),
 	translator = module.parent.require('../public/src/modules/translator'),
 	ReputationManager = new (require('./ReputationManager'))(),
-	ReputationParams = require('./ReputationParams');
+	ReputationParams = require('./ReputationParams'),
+	router,
+	themes = {},
+	app,middleware,
+	Settings    = module.parent.require('./settings'),
+	SocketAdmin = module.parent.require('./socket.io/admin'),
+	Config = require('./Config.js');
 
 
 plugin.upvote = function(vote) {
@@ -176,7 +182,9 @@ plugin.filterUpvote = function(command, callback) {
 			if (!result.allowed) {
 				winston.info('[nodebb-reputation-rules] upvote not allowed');
 				users.getSettings(data.user.uid, function(err, settings) {
+					console.log("Valor del settings.userLang: " + settings.userLang);
 					translator.translate('[[nodebb-plugin-reputation-rules:' + result.reason + ']]', settings.userLang, function(translated) {
+						console.log("Resultado de la traduccion: " + translated);
 						callback(new Error(translated));
 					});
 				});
@@ -231,6 +239,40 @@ function getVoteFromCommand(command) {
 	};
 }
 
+plugin.adminHeader = function (custom_header, callback) {
+	custom_header.plugins.push({
+		"route": '/plugins/reputation-rules',
+		"icon": 'fa-trophy',
+		"name": 'Reputation-rules'
+	});
+
+	callback(null, custom_header);
+}
+
+plugin.onLoad = function (params, callback) {
+	app        = params.app;
+	router     = params.router;
+	middleware = params.middleware;
+
+	function renderAdmin(req, res, next) {
+		res.render('admin/plugins/reputation-rules', {});
+	}
+
+	router.get('/admin/plugins/reputation-rules', middleware.admin.buildHeader, renderAdmin);
+	router.get('/api/admin/plugins/reputation-rules', renderAdmin);
+
+	SocketAdmin.settings.syncReputationRules = function () {
+		console.log("Entro en la funcion de sincronizar los datos de configuracion del plugin reputation-rules.");
+		//plugin.settings.sync(function(){
+		//	loadSettings();
+		//});
+	};
+
+	callback();
+};
+var defaultSettings = Config;
+plugin.settings = new Settings('reputation-rules', '0.0.1', defaultSettings, loadSettings);
+
 /* ----------------------------------------------------------------------------------- */
 function undoUpvote(user, author, post, callback) {
 	//find extra vote value
@@ -252,9 +294,8 @@ function undoDownvote(user, callback) {
 }
 
 function decreaseUserReputation(uid, amount, callback) {
-	if (amount >= 0) {
-		callback();
-		return;
+		if (amount <= 0) {
+			return callback();
 	}
 
 	winston.info("decrease user's reputation (" + uid + ") by " + amount);
@@ -274,8 +315,7 @@ function decreaseUserReputation(uid, amount, callback) {
 
 function increaseUserReputation(uid, amount, callback) {
 	if (amount <= 0) {
-		callback();
-		return;
+		return callback();
 	}
 
 	winston.info("increase user's reputation (" + uid + ") by " + amount);
@@ -306,6 +346,10 @@ function banUserForLowReputation(uid, newreputation) {
 			});
 		});
 	}
+}
+
+function loadSettings() {
+	var config = plugin.settings.get();
 }
 
 module.exports = plugin;
