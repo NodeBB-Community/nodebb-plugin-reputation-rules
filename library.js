@@ -182,9 +182,7 @@ plugin.filterUpvote = function(command, callback) {
 			if (!result.allowed) {
 				winston.info('[nodebb-reputation-rules] upvote not allowed');
 				users.getSettings(data.user.uid, function(err, settings) {
-					console.log("Valor del settings.userLang: " + settings.userLang);
 					translator.translate('[[nodebb-plugin-reputation-rules:' + result.reason + ']]', settings.userLang, function(translated) {
-						console.log("Resultado de la traduccion: " + translated);
 						callback(new Error(translated));
 					});
 				});
@@ -262,10 +260,9 @@ plugin.onLoad = function (params, callback) {
 	router.get('/api/admin/plugins/reputation-rules', renderAdmin);
 
 	SocketAdmin.settings.syncReputationRules = function () {
-		console.log("Entro en la funcion de sincronizar los datos de configuracion del plugin reputation-rules.");
-		//plugin.settings.sync(function(){
-		//	loadSettings();
-		//});
+		plugin.settings.sync(function(){
+			loadSettings();
+		});
 	};
 
 	callback();
