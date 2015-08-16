@@ -252,9 +252,8 @@ function undoDownvote(user, callback) {
 }
 
 function decreaseUserReputation(uid, amount, callback) {
-	if (amount >= 0) {
-		callback();
-		return;
+	if (amount <= 0) {
+		return callback();
 	}
 
 	winston.info("decrease user's reputation (" + uid + ") by " + amount);
@@ -274,8 +273,7 @@ function decreaseUserReputation(uid, amount, callback) {
 
 function increaseUserReputation(uid, amount, callback) {
 	if (amount <= 0) {
-		callback();
-		return;
+		return callback();
 	}
 
 	winston.info("increase user's reputation (" + uid + ") by " + amount);
