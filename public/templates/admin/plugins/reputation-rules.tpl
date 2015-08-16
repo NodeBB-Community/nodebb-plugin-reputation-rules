@@ -2,11 +2,6 @@
     <div class="row">
         <div class="col-lg-9">
             <div class="panel acp-panel-primary">
-                <div class="panel-heading">
-                    <div class="panel-title">
-
-                    </div>
-                </div>
                 <div class="panel-body">
 				    <h3>Reputation Rules Plugin</h3>
 					<p>This plugin lets you configure the parameters to manage the reputation system in your nodebb instance.</p>

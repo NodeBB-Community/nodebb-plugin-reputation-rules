@@ -260,15 +260,13 @@ plugin.onLoad = function (params, callback) {
 	router.get('/api/admin/plugins/reputation-rules', renderAdmin);
 
 	SocketAdmin.settings.syncReputationRules = function () {
-		plugin.settings.sync(function(){
-			loadSettings();
-		});
+		plugin.settings.sync();
 	};
 
 	callback();
 };
-var defaultSettings = Config;
-plugin.settings = new Settings('reputation-rules', '0.0.1', defaultSettings, loadSettings);
+var defaultSettings = Config.getSettings();
+plugin.settings = new Settings('reputation-rules', '0.0.1', defaultSettings);
 
 /* ----------------------------------------------------------------------------------- */
 function undoUpvote(user, author, post, callback) {
@@ -343,10 +341,6 @@ function banUserForLowReputation(uid, newreputation) {
 			});
 		});
 	}
-}
-
-function loadSettings() {
-	var config = plugin.settings.get();
 }
 
 module.exports = plugin;
