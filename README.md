@@ -39,3 +39,4 @@ Undoing votes:
 
 ### (TO-DO)
 - Make admin panel instead of set min/max values on file
+- Ban for low reputation
