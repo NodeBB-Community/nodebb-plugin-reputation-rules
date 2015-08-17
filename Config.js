@@ -85,9 +85,16 @@ var Config = {
 		MIN_REPUTATION_TO_DOWNVOTE = settings.minReputationToDownvote;
 		MAX_VOTES_PER_USER_AND_THREAD = settings.maxVotesPerUserInThread;
 		MAX_VOTES_TO_SAME_USER_PER_MONTH = settings.maxVotesToSameUserInMonth;
-		DISABLED_CATEGORIES_IDS = settings.disabledCategoriesIds;
+		DISABLED_CATEGORIES_IDS = intArray(settings.disabledCategoriesIds);
 	}
 };
+
+function intArray(arr) {
+	for(var i=0; i<arr.length; i++) {
+		arr[i] = parseInt(arr[i], 10);
+	}
+	return arr;
+}
 
 module.exports = Config;
 
