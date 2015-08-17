@@ -4,6 +4,9 @@
   "description": "Reputation rules to prevent abuse and make it more reliable",
   "url": "https://github.com/exo-do/nodebb-plugin-reputation-rules",
   "library": "./library.js",
+  "less": [
+    "public/less/style.less"
+  ],
   "hooks": [
     {
       "hook": "action:post.upvote", "method": "upvote"
@@ -22,11 +25,18 @@
     },
     {
       "hook": "filter:post.unvote", "method": "filterUnvote"
+    },
+    {
+      "hook": "filter:admin.header.build", "method": "adminHeader"
+    },
+    {
+      "hook": "static:app.load", "method": "onLoad"
     }
   ],
   "nbbpm": {
     "compatibility": "^0.7.0"
   },
   "languages": "public/languages",
-  "defaultLang": "en_GB"
+  "defaultLang": "en_GB",
+  "templates": "./public/templates"
 }
