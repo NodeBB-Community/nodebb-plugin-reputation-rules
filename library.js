@@ -239,8 +239,8 @@ function getVoteFromCommand(command) {
 plugin.adminHeader = function (custom_header, callback) {
 	custom_header.plugins.push({
 		"route": '/plugins/reputation-rules',
-		"icon": 'fa-trophy',
-		"name": 'Reputation-rules'
+		"icon": 'fa-ban',
+		"name": 'Reputation Rules'
 	});
 
 	callback(null, custom_header);
