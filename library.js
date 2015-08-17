@@ -7,7 +7,12 @@ var plugin = {},
 	meta = module.parent.require('./meta'),
 	translator = module.parent.require('../public/src/modules/translator'),
 	ReputationManager = new (require('./ReputationManager'))(),
-	ReputationParams = require('./ReputationParams');
+	ReputationParams = require('./ReputationParams'),
+	router,
+	app,middleware,
+	Settings    = module.parent.require('./settings'),
+	SocketAdmin = module.parent.require('./socket.io/admin'),
+	Config = require('./Config.js');
 
 
 plugin.upvote = function(vote) {
@@ -230,6 +235,37 @@ function getVoteFromCommand(command) {
 		tid: command.data.room_id.replace('topic_', '')
 	};
 }
+
+plugin.adminHeader = function (custom_header, callback) {
+	custom_header.plugins.push({
+		"route": '/plugins/reputation-rules',
+		"icon": 'fa-trophy',
+		"name": 'Reputation-rules'
+	});
+
+	callback(null, custom_header);
+};
+
+plugin.onLoad = function (params, callback) {
+	app        = params.app;
+	router     = params.router;
+	middleware = params.middleware;
+
+	function renderAdmin(req, res, next) {
+		res.render('admin/plugins/reputation-rules', {});
+	}
+
+	router.get('/admin/plugins/reputation-rules', middleware.admin.buildHeader, renderAdmin);
+	router.get('/api/admin/plugins/reputation-rules', renderAdmin);
+
+	SocketAdmin.settings.syncReputationRules = function () {
+		plugin.settings.sync();
+	};
+
+	callback();
+};
+var defaultSettings = Config.getSettings();
+plugin.settings = new Settings('reputation-rules', '0.0.1', defaultSettings);
 
 /* ----------------------------------------------------------------------------------- */
 function undoUpvote(user, author, post, callback) {
