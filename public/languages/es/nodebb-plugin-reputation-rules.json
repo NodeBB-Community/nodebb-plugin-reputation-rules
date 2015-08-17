@@ -2,6 +2,7 @@
   "votingDisabledInCategory": "No se puede votar en esta sección",
   "notEnoughPosts": "No tienes suficientes mensajes",
   "notOldEnough": "Llevas poco tiempo registrado",
+  "notEnoughReputation": "No tienes suficiente reputación",
   "tooManyVotesInThread": "No puedes votar más mensajes en este hilo",
   "tooManyVotesToSameUserThisMonth": "Ya has votado a este usuario este mes",
   "tooManyVotesToday": "No puedes votar más mensajes hoy",

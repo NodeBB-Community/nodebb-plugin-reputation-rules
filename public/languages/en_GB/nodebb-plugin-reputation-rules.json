@@ -2,6 +2,7 @@
   "votingDisabledInCategory": "Voting has been disabled in this category",
   "notEnoughPosts": "Not enough messages to vote",
   "notOldEnough": "You are not an old enough member of this forum",
+  "notEnoughReputation": "You don't have enough reputation",
   "tooManyVotesInThread": "You can't vote more messages in this thread",
   "tooManyVotesToSameUserThisMonth": "You can't vote this user again until next month",
   "tooManyVotesToday": "You can't vote more messages today",

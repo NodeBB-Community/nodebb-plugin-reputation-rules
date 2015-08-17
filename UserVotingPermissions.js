@@ -76,7 +76,7 @@ var UserVotingPermissions = function(Config, db, user, post) {
 
     this.hasEnoughReputationToDownvote = function(callback) {
         var allowed = _this.user.reputation > Config.minReputationToDownvote();
-        if (!allowed) callback({'reason': 'notEnoughPosts'});
+        if (!allowed) callback({'reason': 'notEnoughReputation'});
         else callback();
     };
 
