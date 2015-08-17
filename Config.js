@@ -66,9 +66,9 @@ var Config = {
     },
 	getSettings: function(){
 		var settings = {};
-		settings.minPostToUpvote = MIN_POSTS_TO_UPVOTE;
+		settings.minPostsToUpvote = MIN_POSTS_TO_UPVOTE;
 		settings.minDaysToUpvote = MIN_DAYS_TO_UPVOTE;
-		settings.minPostToDownvote = MIN_POSTS_TO_DOWNVOTE;
+		settings.minPostsToDownvote = MIN_POSTS_TO_DOWNVOTE;
 		settings.minDaysToDownvote = MIN_DAYS_TO_DOWNVOTE;
 		settings.minReputationToDownvote = MIN_REPUTATION_TO_DOWNVOTE;
 		settings.maxVotesPerUserInThread = MAX_VOTES_PER_USER_AND_THREAD;
@@ -78,11 +78,11 @@ var Config = {
 		return settings;
 	},
 	setSettings: function(settings){
-		MIN_POSTS_TO_UPVOTE = settings.minPostToDownvote;
-		MIN_DAYS_TO_UPVOTE = settings.minDaysToDownvote;
-		MIN_POSTS_TO_DOWNVOTE = settings.minReputationToDownvote;
-		MIN_DAYS_TO_DOWNVOTE = settings.minPostToUpvote;
-		MIN_REPUTATION_TO_DOWNVOTE = settings.minDaysToUpvote;
+		MIN_POSTS_TO_UPVOTE = settings.minPostsToUpvote;
+		MIN_DAYS_TO_UPVOTE = settings.minDaysToUpvote;
+		MIN_POSTS_TO_DOWNVOTE = settings.minPostsToDownvote;
+		MIN_DAYS_TO_DOWNVOTE = settings.minDaysToDownvote;
+		MIN_REPUTATION_TO_DOWNVOTE = settings.minReputationToDownvote;
 		MAX_VOTES_PER_USER_AND_THREAD = settings.maxVotesPerUserInThread;
 		MAX_VOTES_TO_SAME_USER_PER_MONTH = settings.maxVotesToSameUserInMonth;
 		DISABLED_CATEGORIES_IDS = settings.disabledCategoriesIds;

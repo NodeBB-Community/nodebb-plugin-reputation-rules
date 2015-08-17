@@ -6,14 +6,12 @@ var plugin = {},
 	users = module.parent.require('./user'),
 	meta = module.parent.require('./meta'),
 	translator = module.parent.require('../public/src/modules/translator'),
-	ReputationManager = new (require('./ReputationManager'))(),
+	ReputationManager = null,
 	ReputationParams = require('./ReputationParams'),
 	Settings    = module.parent.require('./settings'),
 	SocketAdmin = module.parent.require('./socket.io/admin'),
-	Config = require('./Config.js');
-
-var defaultSettings = Config.getSettings();
-plugin.settings = new Settings('reputation-rules', '0.0.1', defaultSettings);
+	Config = require('./Config.js'),
+	pluginSettings = null;
 
 plugin.upvote = function(vote) {
 	winston.info('[hook:upvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
@@ -247,6 +245,8 @@ plugin.adminHeader = function (custom_header, callback) {
 };
 
 plugin.onLoad = function (params, callback) {
+	ReputationManager = new (require('./ReputationManager'))(Config);
+
 	var app        = params.app,
 		router     = params.router,
 		middleware = params.middleware;
@@ -259,10 +259,18 @@ plugin.onLoad = function (params, callback) {
 	router.get('/api/admin/plugins/reputation-rules', renderAdmin);
 
 	SocketAdmin.settings.syncReputationRules = function () {
-		plugin.settings.sync();
+		pluginSettings.sync(function() {
+			winston.info("[reputation-rules] settings updated");
+			Config.setSettings(pluginSettings.get());
+		});
 	};
 
-	callback();
+	var defaultSettings = Config.getSettings();
+	pluginSettings = new Settings('reputation-rules', '0.0.1', defaultSettings, function() {
+		winston.info("[reputation-rules] settings loaded");
+		Config.setSettings(pluginSettings.get());
+		callback();
+	});
 };
 
 /* ----------------------------------------------------------------------------------- */

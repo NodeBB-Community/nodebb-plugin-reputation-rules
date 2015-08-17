@@ -11,7 +11,7 @@
                         <!-- (MIN_POSTS_TO_UPVOTE) -->
                         <div class="col-xs-12 col-md-6 form-group">
                             <label>Minimum amount of posts to upvote:</label>
-                            <input class="form-control" type="number" data-key="minPostToUpvote" title="Minimum posts to upvote">
+                            <input class="form-control" type="number" data-key="minPostsToUpvote" title="Minimum posts to upvote">
                         </div>
                         <!-- (MIN_DAYS_TO_UPVOTE) -->
                         <div class="col-xs-12 col-md-6 form-group">
@@ -25,7 +25,7 @@
                         <!-- (MIN_POSTS_TO_DOWNVOTE) -->
                         <div class="col-xs-12 col-md-6 form-group">
                             <label>Minimum amount of posts to downvote:</label>
-                            <input class="form-control" type="number" data-key="minPostToDownvote" title="Minimum posts to downvote">
+                            <input class="form-control" type="number" data-key="minPostsToDownvote" title="Minimum posts to downvote">
                         </div>
                         <!-- (MIN_DAYS_TO_DOWNVOTE) -->
                         <div class="col-xs-12 col-md-6 form-group">
