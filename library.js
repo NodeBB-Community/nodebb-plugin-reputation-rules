@@ -8,12 +8,12 @@ var plugin = {},
 	translator = module.parent.require('../public/src/modules/translator'),
 	ReputationManager = new (require('./ReputationManager'))(),
 	ReputationParams = require('./ReputationParams'),
-	router,
-	app,middleware,
 	Settings    = module.parent.require('./settings'),
 	SocketAdmin = module.parent.require('./socket.io/admin'),
 	Config = require('./Config.js');
 
+var defaultSettings = Config.getSettings();
+plugin.settings = new Settings('reputation-rules', '0.0.1', defaultSettings);
 
 plugin.upvote = function(vote) {
 	winston.info('[hook:upvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
@@ -247,9 +247,9 @@ plugin.adminHeader = function (custom_header, callback) {
 };
 
 plugin.onLoad = function (params, callback) {
-	app        = params.app;
-	router     = params.router;
-	middleware = params.middleware;
+	var app        = params.app,
+		router     = params.router,
+		middleware = params.middleware;
 
 	function renderAdmin(req, res, next) {
 		res.render('admin/plugins/reputation-rules', {});
@@ -264,8 +264,6 @@ plugin.onLoad = function (params, callback) {
 
 	callback();
 };
-var defaultSettings = Config.getSettings();
-plugin.settings = new Settings('reputation-rules', '0.0.1', defaultSettings);
 
 /* ----------------------------------------------------------------------------------- */
 function undoUpvote(user, author, post, callback) {
