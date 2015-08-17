@@ -38,4 +38,4 @@ Undoing votes:
  - undoing a downvote should give +1 to voter (and also +1 to post author, but that's something NodeBB already takes cares of)
 
 ### (TO-DO)
-- Make admin panel instead of set min/max values on file
+- Ban for low reputation

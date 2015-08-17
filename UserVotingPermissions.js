@@ -1,8 +1,6 @@
 'use strict';
 
-var Config = require('./Config.js');
-
-var UserVotingPermissions = function(db, user, post) {
+var UserVotingPermissions = function(Config, db, user, post) {
     var _this = this;
     this.user = user;
     this.post = post;

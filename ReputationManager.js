@@ -2,12 +2,11 @@
 
 var db = module.parent.parent.require('./database'),
 	async = require('async'),
-	Config = require('./Config.js'),
 	UserVotingPermissions = require('./UserVotingPermissions.js');
 
-var ReputationManager = function() {
+var ReputationManager = function(Config) {
 	this.userCanUpvotePost = function(user, post, callback) {
-		var userPermissions = new UserVotingPermissions(db, user, post);
+		var userPermissions = new UserVotingPermissions(Config, db, user, post);
 
 		async.series([
 				userPermissions.votingAllowedInCategory,
@@ -33,7 +32,7 @@ var ReputationManager = function() {
 	};
 
 	this.userCanDownvotePost = function(user, post, callback) {
-		var userPermissions = new UserVotingPermissions(db, user, post);
+		var userPermissions = new UserVotingPermissions(Config, db, user, post);
 
 		async.series([
 				userPermissions.votingAllowedInCategory,

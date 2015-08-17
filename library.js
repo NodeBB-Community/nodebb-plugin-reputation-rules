@@ -6,9 +6,12 @@ var plugin = {},
 	users = module.parent.require('./user'),
 	meta = module.parent.require('./meta'),
 	translator = require('./translator'),
-	ReputationManager = new (require('./ReputationManager'))(),
-	ReputationParams = require('./ReputationParams');
-
+	ReputationManager = null,
+	ReputationParams = require('./ReputationParams'),
+	Settings    = module.parent.require('./settings'),
+	SocketAdmin = module.parent.require('./socket.io/admin'),
+	Config = require('./Config.js'),
+	pluginSettings = null;
 
 plugin.upvote = function(vote) {
 	winston.info('[hook:upvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
@@ -227,6 +230,45 @@ function getVoteFromCommand(command) {
 	};
 }
 
+plugin.adminHeader = function (custom_header, callback) {
+	custom_header.plugins.push({
+		"route": '/plugins/reputation-rules',
+		"icon": 'fa-ban',
+		"name": 'Reputation Rules'
+	});
+
+	callback(null, custom_header);
+};
+
+plugin.onLoad = function (params, callback) {
+	ReputationManager = new (require('./ReputationManager'))(Config);
+
+	var app        = params.app,
+		router     = params.router,
+		middleware = params.middleware;
+
+	function renderAdmin(req, res, next) {
+		res.render('admin/plugins/reputation-rules', {});
+	}
+
+	router.get('/admin/plugins/reputation-rules', middleware.admin.buildHeader, renderAdmin);
+	router.get('/api/admin/plugins/reputation-rules', renderAdmin);
+
+	SocketAdmin.settings.syncReputationRules = function () {
+		pluginSettings.sync(function() {
+			winston.info("[reputation-rules] settings updated");
+			Config.setSettings(pluginSettings.get());
+		});
+	};
+
+	var defaultSettings = Config.getSettings();
+	pluginSettings = new Settings('reputation-rules', '0.0.1', defaultSettings, function() {
+		winston.info("[reputation-rules] settings loaded");
+		Config.setSettings(pluginSettings.get());
+		callback();
+	});
+};
+
 /* ----------------------------------------------------------------------------------- */
 function undoUpvote(user, author, post, callback) {
 	//find extra vote value
@@ -248,9 +290,8 @@ function undoDownvote(user, callback) {
 }
 
 function decreaseUserReputation(uid, amount, callback) {
-	if (amount >= 0) {
-		callback();
-		return;
+	if (amount <= 0) {
+		return callback();
 	}
 
 	winston.info("decrease user's reputation (" + uid + ") by " + amount);
@@ -270,8 +311,7 @@ function decreaseUserReputation(uid, amount, callback) {
 
 function increaseUserReputation(uid, amount, callback) {
 	if (amount <= 0) {
-		callback();
-		return;
+		return callback();
 	}
 
 	winston.info("increase user's reputation (" + uid + ") by " + amount);
