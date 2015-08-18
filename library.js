@@ -1,6 +1,6 @@
 "use strict";
 
-var plugin = {},
+var plugin = {'version': '1.0.0'},
     db = module.parent.require('./database'),
 	winston = require('winston'),
 	users = module.parent.require('./user'),
@@ -262,7 +262,7 @@ plugin.onLoad = function (params, callback) {
 	};
 
 	var defaultSettings = Config.getSettings();
-	pluginSettings = new Settings('reputation-rules', '0.0.1', defaultSettings, function() {
+	pluginSettings = new Settings('reputation-rules', plugin.version, defaultSettings, function() {
 		winston.info("[reputation-rules] settings loaded");
 		Config.setSettings(pluginSettings.get());
 		callback();

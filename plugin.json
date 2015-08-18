@@ -34,9 +34,7 @@
     }
   ],
   "nbbpm": {
-    "compatibility": "^0.7.0"
+    "compatibility": "^0.7.x"
   },
-  "languages": "public/languages",
-  "defaultLang": "en_GB",
   "templates": "./public/templates"
 }
