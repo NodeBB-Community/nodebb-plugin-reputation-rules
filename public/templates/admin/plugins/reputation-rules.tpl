@@ -5,6 +5,7 @@
                 <div class="panel-body">
 				    <h3>Reputation Rules Plugin</h3>
 					<p>This plugin lets you configure the parameters to manage the reputation system in your NodeBB instance.</p>
+					<p class="alert alert-warning">Remember to <strong>save AND reload</strong> to apply changes to all running instances of NodeBB.</p>
 
                     <h3>Upvoting</h3>
                     <div class="form-group">
@@ -65,9 +66,16 @@
                     </div>
                     <div class="clearfix"></div>
 					<div class="form-group">
-                        <button type="button" class="btn btn-success form-control" id="save">
-                            <i class="fa fa-fw fa-save"></i> Save Configuration
-                        </button>
+					    <div class="col-xs-12 col-md-6 form-group">
+                            <button type="button" class="btn btn-success form-control" id="save">
+                                <i class="fa fa-fw fa-save"></i> Save Configuration
+                            </button>
+                        </div>
+                        <div class="col-xs-12 col-md-6 form-group">
+                            <button type="button" class="btn btn-info form-control" id="reload">
+                                <i class="fa fa-fw fa-refresh"></i> Reload NodeBB
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -96,6 +104,13 @@ require(['settings'], function(settings) {
         event.preventDefault();
         settings.persist('reputation-rules', wrapper, function() {
             socket.emit('admin.settings.syncReputationRules');
+        });
+    });
+
+    $('#reload').click(function(event) {
+        event.preventDefault();
+        require(['admin/modules/instance'], function(instance) {
+            instance.reload();
         });
     });
 
