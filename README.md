@@ -30,7 +30,7 @@ A user cannot vote more than 5 messages in the same thread
 
 ### Rule #8 
 Upvotes give extra reputation depending on the user who is voting:  
- - extra reputation = `floor(voter_reputation/10)`
+ - extra reputation = `floor(votersReputation * 5%)` (you can change this percentage in the ACP)
 
 ### Rule #9 
 Undoing votes:  
