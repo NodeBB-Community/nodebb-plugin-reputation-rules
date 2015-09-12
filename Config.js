@@ -5,6 +5,7 @@ var MIN_POSTS_TO_UPVOTE = 20,
     MIN_REPUTATION_TO_DOWNVOTE = 10,
     MAX_VOTES_PER_USER_AND_THREAD = 5,
     MAX_VOTES_TO_SAME_USER_PER_MONTH = 1,
+	UPVOTE_EXTRA_PERCENTAGE = 5,
     REP_LOG_NAMESPACE = "reputationLog",
     DISABLED_CATEGORIES_IDS = [];
 
@@ -41,6 +42,9 @@ var Config = {
         }
         return calculatedVotesPerUser;
     },
+	upvoteExtraPercentage: function() {
+		return UPVOTE_EXTRA_PERCENTAGE;
+	},
     getMainLogId: function(voterId, authorId, topicId, postId) {
         return REP_LOG_NAMESPACE + ":"
             + voterId + ":"
@@ -73,6 +77,7 @@ var Config = {
 		settings.minReputationToDownvote = MIN_REPUTATION_TO_DOWNVOTE;
 		settings.maxVotesPerUserInThread = MAX_VOTES_PER_USER_AND_THREAD;
 		settings.maxVotesToSameUserInMonth = MAX_VOTES_TO_SAME_USER_PER_MONTH;
+		settings.upvoteExtraPercentage = UPVOTE_EXTRA_PERCENTAGE;
 		settings.disabledCategoriesIds = DISABLED_CATEGORIES_IDS;
 		settings.repLogNamespace = REP_LOG_NAMESPACE;
 		return settings;
@@ -85,6 +90,7 @@ var Config = {
 		MIN_REPUTATION_TO_DOWNVOTE = settings.minReputationToDownvote;
 		MAX_VOTES_PER_USER_AND_THREAD = settings.maxVotesPerUserInThread;
 		MAX_VOTES_TO_SAME_USER_PER_MONTH = settings.maxVotesToSameUserInMonth;
+		UPVOTE_EXTRA_PERCENTAGE = settings.upvoteExtraPercentage;
 		DISABLED_CATEGORIES_IDS = intArray(settings.disabledCategoriesIds);
 	}
 };

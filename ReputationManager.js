@@ -59,7 +59,8 @@ var ReputationManager = function(Config) {
 	};
 
 	this.calculateUpvoteWeight = function(user) {
-		var weight = Math.floor(user.reputation/10);
+		var extraRate = Config.upvoteExtraPercentage()/100;
+		var weight = Math.floor(user.reputation * extraRate);
 		if (weight<0) weight = 0;
 		return weight;
 	};

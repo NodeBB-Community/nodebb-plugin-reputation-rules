@@ -19,6 +19,11 @@
                             <label>Minimum amount of days since registration to upvote:</label>
                             <input class="form-control" type="number" data-key="minDaysToUpvote" title="Minimum days to upvote">
                         </div>
+                        <!-- (UPVOTE_EXTRA_PERCENTAGE) -->
+                        <div class="col-xs-12 col-md-6 form-group">
+                            <label>Percentage of voter's reputation that is added as extra (this extra is not subtracted from voter!):</label>
+                            <input class="form-control" type="number" data-key="upvoteExtraPercentage" title="Upvote extra reputation">
+                        </div>
                     </div>
                     <div class="clearfix"></div>
                     <h3>Downvoting</h3>
