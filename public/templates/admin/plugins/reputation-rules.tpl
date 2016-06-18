@@ -21,8 +21,8 @@
                         </div>
                         <!-- (UPVOTE_EXTRA_PERCENTAGE) -->
                         <div class="col-xs-12 col-md-6 form-group">
-                            <label>Percentage of voter's reputation that is added as extra (this extra is not subtracted from voter!):</label>
-                            <input class="form-control" type="number" data-key="upvoteExtraPercentage" title="Upvote extra reputation">
+                            <label>Percentage of voter's reputation that is added as extra (upvote weigh):</label>
+                            <input class="form-control" type="number" data-key="upvoteExtraPercentage" title="Upvote weigh">
                         </div>
                     </div>
                     <div class="clearfix"></div>
@@ -42,6 +42,16 @@
                         <div class="col-xs-12 col-md-6 form-group">
                             <label>Minimum amount of reputation to downvote:</label>
                             <input class="form-control" type="number" data-key="minReputationToDownvote" title="Minimum reputation to downvote">
+                        </div>
+                        <!-- (DOWNVOTE_EXTRA_PERCENTAGE) -->
+                        <div class="col-xs-12 col-md-6 form-group">
+                            <label>Percentage of voter's reputation that is substracted to post author (downvote weigh):</label>
+                            <input class="form-control" type="number" data-key="downvoteExtraPercentage" title="Downvote weigh">
+                        </div>
+                        <!-- (DOWNVOTE_PENALIZATION) -->
+                        <div class="col-xs-12 col-md-6 form-group">
+                            <label>Downvote penalization (amount of points to remove from user who downvotes):</label>
+                            <input class="form-control" type="number" data-key="downvotePenalization" title="Downvote penalization">
                         </div>
                     </div>
                     <div class="clearfix"></div>
