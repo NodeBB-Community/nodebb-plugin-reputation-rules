@@ -1,6 +1,6 @@
 "use strict";
 
-var plugin = {'settingsVersion': '1.0.0'},
+var plugin = {'settingsVersion': '1.0.3'},
     db = module.parent.require('./database'),
 	winston = require('winston'),
 	users = module.parent.require('./user'),
@@ -23,9 +23,9 @@ plugin.upvote = function(vote) {
 			return;
 		}
 
-		//deshacer un posible downvote: devolver +1 al usuario que emite el voto
+		//undo downvote (if needed): remove penalization to the user who downvoted
 		if (vote.current === 'downvote') {
-			undoDownvote(data.user, function(err) {
+			undoDownvote(data.user, data.author, data.post, function(err) {
 				if (err) {
 					winston.error('[nodebb-reputation-rules] Error undoing downvote');
 				}
@@ -73,7 +73,7 @@ plugin.downvote = function(vote) {
 			return;
 		}
 
-		//deshacer un posible upvote: quitar al autor del post el "upvote" que le habian dado
+		//undo upvote (if any): remove author's rep won with the upvote
 		if (vote.current === 'upvote') {
 			undoUpvote(data.user, data.author, data.post, function(err) {
 				if (err) {
@@ -82,27 +82,37 @@ plugin.downvote = function(vote) {
 			});
 		}
 
-		//and now the downvote: reduce voter's reputation by one
-		decreaseUserReputation(vote.uid, 1, function(err) {
+		//and now the downvote:
+		// reduce author's reputation by {DOWNVOTE_EXTRA_PERCENTAGE}
+		// reduce voter's reputation by {DOWNVOTE_PENALIZATION}
+		var extraPoints = ReputationManager.calculateDownvoteWeight(data.user);
+		decreaseUserReputation(data.author.uid, extraPoints, function(err) {
 			if (err) {
-				winston.error('[nodebb-reputation-rules] Error on downvote filter hook');
+				winston.error('[nodebb-reputation-rules] Error reducing author\'s reputation on downvote');
 			}
 
-			//log this operation so we can undo it in the future
-			var voteLog = {
-				'date': new Date(),
-				'voterId': data.user.uid,
-				'authorId': data.author.uid,
-				'topicId': parseInt(data.post.tid),
-				'postId': data.post.pid,
-				'type': 'downvote',
-				'amount': -1
-			};
-			ReputationManager.logVote(voteLog, function(err) {
+			console.log('penalization:' + Config.downvotePenalization());
+			decreaseUserReputation(data.user.uid, Config.downvotePenalization(), function(err) {
 				if (err) {
-					winston.error('[nodebb-reputation-rules] Error saving vote log: ' + err.message);
-					winston.error(voteLog);
+					winston.error('[nodebb-reputation-rules] Error reducing voter\'s rep (penalization) on downvote');
 				}
+
+				//log this operation so we can undo it in the future
+				var voteLog = {
+					'date': new Date(),
+					'voterId': data.user.uid,
+					'authorId': data.author.uid,
+					'topicId': parseInt(data.post.tid),
+					'postId': data.post.pid,
+					'type': 'downvote',
+					'amount': extraPoints
+				};
+				ReputationManager.logVote(voteLog, function(err) {
+					if (err) {
+						winston.error('[nodebb-reputation-rules] Error saving vote log: ' + err.message);
+						winston.error(voteLog);
+					}
+				});
 			});
 		});
 	});
@@ -112,8 +122,9 @@ plugin.unvote = function(vote) {
 	winston.info('[hook:unvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
 	/* how to undo a vote:
-		CASE upvote: reduce author's reputation in case he won extra points when upvoted
-		CASE dowvote: increase both user's reputation by 1 (voter and voted user)
+		CASE upvote: reduce author's reputation in case he won extra points when upvoted ({UPVOTE_EXTRA_PERCENTAGE})
+		CASE dowvote: increase author's reputation by {DOWNVOTE_EXTRA_PERCENTAGE}
+					  increase voter's reputation by {DOWNVOTE_PENALIZATION}
 	 */
 	var reputationParams = new ReputationParams(vote.uid, vote.pid);
 	reputationParams.recoverParams(function(err, data) {
@@ -130,7 +141,7 @@ plugin.unvote = function(vote) {
 		};
 
 		if (vote.current === 'downvote') {
-			undoDownvote(data.user, function(err) {
+			undoDownvote(data.user, data.author, data.post, function(err) {
 				if (err) {
 					winston.error('[nodebb-reputation-rules] Error undoing downvote');
 					return;
@@ -284,9 +295,22 @@ function undoUpvote(user, author, post, callback) {
 	});
 }
 
-function undoDownvote(user, callback) {
-	increaseUserReputation(user.uid, 1, callback);
-	//the system will take care of removing the "-1" to the post author
+function undoDownvote(user, author, post, callback) {
+	//find extra vote value
+	ReputationManager.findVoteLog(user, author, post, function(err, voteLog) {
+		if (err) {
+			callback(err);
+			return;
+		}
+
+		var amount = voteLog.amount;
+		//increase authors's rep
+		increaseUserReputation(author.uid, amount, function() {
+			//author reputation restored, now how about the voter penalization? must be removed too!
+			var penalization = Config.downvotePenalization();
+			increaseUserReputation(user.uid, penalization, callback);
+		});
+	});
 }
 
 function decreaseUserReputation(uid, amount, callback) {

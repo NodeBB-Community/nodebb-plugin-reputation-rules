@@ -62,6 +62,15 @@ var ReputationManager = function(Config) {
 		var extraRate = Config.upvoteExtraPercentage()/100;
 		var weight = Math.floor(user.reputation * extraRate);
 		if (weight<0) weight = 0;
+		//TODO capar maximo
+		return weight;
+	};
+
+	this.calculateDownvoteWeight = function(user) {
+		var extraRate = Config.downvoteExtraPercentage()/100;
+		var weight = Math.floor(user.reputation * extraRate);
+		if (weight<0) weight = 0;
+		//TODO capar maximo
 		return weight;
 	};
 

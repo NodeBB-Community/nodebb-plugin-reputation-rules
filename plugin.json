@@ -34,7 +34,7 @@
     }
   ],
   "nbbpm": {
-    "compatibility": "^0.7.x"
+    "compatibility": "^1.0.x"
   },
   "templates": "./public/templates"
 }

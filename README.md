@@ -14,7 +14,7 @@
  - {MIN_REPUTATION_TO_DOWNVOTE} reputation or more
 
 ### Rule #3 
-Downvoting costs 1 reputation (user who votes loses 1 reputation)
+Downvoting costs {DOWNVOTE_PENALIZATION} reputation (user who votes loses some reputation)
 
 ### Rule #4 
 One user can't vote (up or down) more than `X` times a day, being `X = reputation/10`. With a minimum of 5 and a max of 50
@@ -31,11 +31,14 @@ A user cannot vote more than 5 messages in the same thread
 ### Rule #8 
 Upvotes give extra reputation depending on the user who is voting:  
  - extra reputation = `floor(votersReputation * 5%)` (you can change this percentage in the ACP)
+ 
+Downvotes decrease extra reputation depending on the user who is voting:  
+ - extra reputation = `floor(votersReputation * 5%)` (you can change this percentage in the ACP)
 
 ### Rule #9 
 Undoing votes:  
  - undoing an upvote should remove extra reputation awarded when upvote was given (extra rep should not be recalculated)
- - undoing a downvote should give +1 to voter (and also +1 to post author, but that's something NodeBB already takes cares of)
+ - undoing a downvote should remove penalization to voter and give the extra reputation the author lost when he got the downvote
 
 ### (TO-DO)
 - Ban for low reputation
