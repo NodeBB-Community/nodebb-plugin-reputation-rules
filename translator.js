@@ -8,7 +8,7 @@ var languages, texts = null;
 loadTexts();
 
 var translator = {
-    translate: function(text, language, defaultLanguage) {
+    translate: function (text, language, defaultLanguage) {
         if (!languageSupported(language)) {
             language = defaultLanguage || 'en_GB';
         }
@@ -20,7 +20,7 @@ var translator = {
 function loadTexts() {
     languages = [];
     texts = [];
-    fs.readdirSync(LANGUAGE_DIR).forEach(function(langFolder) {
+    fs.readdirSync(LANGUAGE_DIR).forEach(function (langFolder) {
         languages.push(langFolder);
         texts[langFolder] = loadLanguageTexts(langFolder);
     });
@@ -28,7 +28,7 @@ function loadTexts() {
 
 function loadLanguageTexts(language) {
     var allPhrases = {};
-    fs.readdirSync(LANGUAGE_DIR + language).forEach(function(phrasesFile) {
+    fs.readdirSync(LANGUAGE_DIR + language).forEach(function (phrasesFile) {
         var phrases = require(LANGUAGE_DIR + language + '/' + phrasesFile);
         for (var phraseKey in phrases) {
             allPhrases[phraseKey] = phrases[phraseKey];
