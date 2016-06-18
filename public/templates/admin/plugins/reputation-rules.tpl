@@ -3,8 +3,6 @@
 
         <div class="row">
             <div class="col-sm-12 col-xs-12">
-                <h3>Reputation Rules Plugin</h3>
-                <p>This plugin lets you configure the parameters to manage the reputation system in your NodeBB instance.</p>
                 <p class="alert alert-info">Remember to <strong>save AND reload</strong> to apply changes to all running instances of NodeBB.</p>
             </div>
         </div>
