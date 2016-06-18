@@ -40,5 +40,8 @@ Undoing votes:
  - undoing an upvote should remove extra reputation awarded when upvote was given (extra rep should not be recalculated)
  - undoing a downvote should remove penalization to voter and give the extra reputation the author lost when he got the downvote
 
+### Rule #10 
+Upvotes and downvotes should have a maximum weigh, configurable. So that rule **#8** doesn't make vote points tend to infinity.
+
 ### (TO-DO)
 - Ban for low reputation

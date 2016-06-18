@@ -9,7 +9,9 @@ var MIN_POSTS_TO_UPVOTE = 20,
     DOWNVOTE_EXTRA_PERCENTAGE = 5,
     DOWNVOTE_PENALIZATION = 1,
     REP_LOG_NAMESPACE = "reputationLog",
-    DISABLED_CATEGORIES_IDS = [];
+    DISABLED_CATEGORIES_IDS = [],
+    MAX_POINTS_FOR_UPVOTE = 10,
+    MAX_POINTS_FOR_DOWNVOTE = 10;
 
 var Config = {
     minPostToDownvote: function () {
@@ -53,6 +55,12 @@ var Config = {
     downvotePenalization: function () {
         return DOWNVOTE_PENALIZATION;
     },
+    maxUpvoteWeigh: function () {
+        return MAX_POINTS_FOR_UPVOTE;
+    },
+    maxDownvoteWeigh: function () {
+        return MAX_POINTS_FOR_DOWNVOTE;
+    },
     getMainLogId: function (voterId, authorId, topicId, postId) {
         return REP_LOG_NAMESPACE + ":"
             + voterId + ":"
@@ -90,6 +98,8 @@ var Config = {
         settings.downvotePenalization = DOWNVOTE_PENALIZATION;
         settings.disabledCategoriesIds = DISABLED_CATEGORIES_IDS;
         settings.repLogNamespace = REP_LOG_NAMESPACE;
+        settings.maxUpvoteWeigh = MAX_POINTS_FOR_UPVOTE;
+        settings.maxDownvoteWeigh = MAX_POINTS_FOR_DOWNVOTE;
         return settings;
     },
     setSettings: function (settings) {
@@ -104,6 +114,8 @@ var Config = {
         DOWNVOTE_EXTRA_PERCENTAGE = settings.downvoteExtraPercentage;
         DOWNVOTE_PENALIZATION = settings.downvotePenalization;
         DISABLED_CATEGORIES_IDS = intArray(settings.disabledCategoriesIds);
+        MAX_POINTS_FOR_UPVOTE = settings.maxUpvoteWeigh;
+        MAX_POINTS_FOR_DOWNVOTE = settings.maxDownvoteWeigh;
     }
 };
 

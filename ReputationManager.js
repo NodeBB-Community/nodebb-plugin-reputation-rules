@@ -58,20 +58,24 @@ var ReputationManager = function(Config) {
 			});
 	};
 
-	this.calculateUpvoteWeight = function(user) {
+	this.calculateUpvoteWeigh = function(user) {
 		var extraRate = Config.upvoteExtraPercentage()/100;
-		var weight = Math.floor(user.reputation * extraRate);
-		if (weight<0) weight = 0;
-		//TODO capar maximo
-		return weight;
+		var weigh = Math.floor(user.reputation * extraRate);
+		if (weigh<0) weigh = 0;
+		if (Config.maxUpvoteWeigh() > weigh) {
+			weigh = Config.maxUpvoteWeigh();
+		}
+		return weigh;
 	};
 
-	this.calculateDownvoteWeight = function(user) {
+	this.calculateDownvoteWeigh = function(user) {
 		var extraRate = Config.downvoteExtraPercentage()/100;
-		var weight = Math.floor(user.reputation * extraRate);
-		if (weight<0) weight = 0;
-		//TODO capar maximo
-		return weight;
+		var weigh = Math.floor(user.reputation * extraRate);
+		if (weigh<0) weigh = 0;
+		if (Config.maxDownvoteWeigh() > weigh) {
+			weigh = Config.maxDownvoteWeigh();
+		}
+		return weigh;
 	};
 
 	this.logVote = function(vote, callback) {

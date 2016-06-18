@@ -24,6 +24,11 @@
                             <label>Percentage of voter's reputation that is added as extra (upvote weigh):</label>
                             <input class="form-control" type="number" data-key="upvoteExtraPercentage" title="Upvote weigh">
                         </div>
+                        <!-- (MAX_POINTS_FOR_UPVOTE) -->
+                        <div class="col-xs-12 col-md-6 form-group">
+                            <label>Max upvote weigh (points):</label>
+                            <input class="form-control" type="number" data-key="maxUpvoteWeigh" title="Max upvote points">
+                        </div>
                     </div>
                     <div class="clearfix"></div>
                     <h3>Downvoting</h3>
@@ -52,6 +57,11 @@
                         <div class="col-xs-12 col-md-6 form-group">
                             <label>Downvote penalization (amount of points to remove from user who downvotes):</label>
                             <input class="form-control" type="number" data-key="downvotePenalization" title="Downvote penalization">
+                        </div>
+                        <!-- (MAX_POINTS_FOR_DOWNVOTE) -->
+                        <div class="col-xs-12 col-md-6 form-group">
+                            <label>Max downvote weigh (points):</label>
+                            <input class="form-control" type="number" data-key="maxDownvoteWeigh" title="Max downvote points">
                         </div>
                     </div>
                     <div class="clearfix"></div>
