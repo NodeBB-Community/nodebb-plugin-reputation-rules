@@ -6,7 +6,7 @@ var UserVotingPermissions = function(Config, db, user, post) {
     this.post = post;
 
     this.hasEnoughPostsToUpvote = function(callback) {
-        var allowed = _this.user.postcount > Config.minPostToUpvote();
+        var allowed = _this.user.postcount >= Config.minPostToUpvote();
         if (!allowed) callback({'reason': 'notEnoughPosts'});
         else callback();
     };
@@ -60,7 +60,7 @@ var UserVotingPermissions = function(Config, db, user, post) {
     };
 
     this.hasEnoughPostsToDownvote = function(callback) {
-        var allowed = _this.user.postcount > Config.minPostToDownvote();
+        var allowed = _this.user.postcount >= Config.minPostToDownvote();
         if (!allowed) callback({'reason': 'notEnoughPosts'});
         else callback();
     };
@@ -75,7 +75,7 @@ var UserVotingPermissions = function(Config, db, user, post) {
     };
 
     this.hasEnoughReputationToDownvote = function(callback) {
-        var allowed = _this.user.reputation > Config.minReputationToDownvote();
+        var allowed = _this.user.reputation >= Config.minReputationToDownvote();
         if (!allowed) callback({'reason': 'notEnoughReputation'});
         else callback();
     };
