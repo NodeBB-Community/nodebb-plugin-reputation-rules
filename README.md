@@ -1,3 +1,5 @@
+[![npm version](https://badge.fury.io/js/nodebb-plugin-reputation-rules.svg)](https://badge.fury.io/js/nodebb-plugin-reputation-rules) [![Code Climate](https://codeclimate.com/github/exo-do/nodebb-plugin-reputation-rules/badges/gpa.svg)](https://codeclimate.com/github/exo-do/nodebb-plugin-reputation-rules)
+
 # Reputation Rules Plugin for NodeBB
 
 > Rules to prevent abuse of the reputation system and reward most valuable users.
