@@ -2,16 +2,61 @@
 
 var plugin = {'settingsVersion': '1.0.3'},
     db = module.parent.require('./database'),
-    winston = require('winston'),
     users = module.parent.require('./user'),
     meta = module.parent.require('./meta'),
-    translator = require('./translator'),
-    ReputationManager = null,
-    ReputationParams = require('./ReputationParams'),
     Settings = module.parent.require('./settings'),
     SocketAdmin = module.parent.require('./socket.io/admin'),
+
+    winston = require('winston'),
+
+    ReputationParams = require('./ReputationParams'),
+    VoteLog = require('./VoteLog'),
     Config = require('./Config.js'),
+
+    ReputationManager = null,
+    VoteFilter = null,
     pluginSettings = null;
+
+plugin.onLoad = function (params, callback) {
+    ReputationManager = new (require('./ReputationManager'))(Config);
+    VoteFilter = new (require('./VoteFilter'))(ReputationManager, users);
+
+    var router = params.router,
+        middleware = params.middleware;
+
+    function renderAdmin(req, res, next) {
+        res.render('admin/plugins/reputation-rules', {});
+    }
+
+    router.get('/admin/plugins/reputation-rules', middleware.admin.buildHeader, renderAdmin);
+    router.get('/api/admin/plugins/reputation-rules', renderAdmin);
+
+    SocketAdmin.settings.syncReputationRules = function () {
+        pluginSettings.sync(function () {
+            winston.info("[reputation-rules] settings updated");
+            Config.setSettings(pluginSettings.get());
+        });
+    };
+
+    var defaultSettings = Config.getSettings();
+    pluginSettings = new Settings('reputation-rules', plugin.settingsVersion, defaultSettings, function () {
+        winston.info("[reputation-rules] settings loaded");
+        Config.setSettings(pluginSettings.get());
+        callback();
+    });
+};
+
+plugin.filterUpvote = function (command, callback) {
+    VoteFilter.filterUpvote(command, callback);
+};
+
+plugin.filterDownvote = function (command, callback) {
+    VoteFilter.filterDownvote(command, callback);
+};
+
+plugin.filterUnvote = function (command, callback) {
+    VoteFilter.filterUnvote(command, callback);
+};
 
 plugin.upvote = function (vote) {
     winston.info('[hook:upvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
@@ -43,15 +88,7 @@ plugin.upvote = function (vote) {
             }
 
             //log this operation so we can undo it in the future
-            var voteLog = {
-                'date': new Date(),
-                'voterId': data.user.uid,
-                'authorId': data.author.uid,
-                'topicId': parseInt(data.post.tid, 10),
-                'postId': data.post.pid,
-                'type': 'upvote',
-                'amount': extraPoints
-            };
+            var voteLog = new VoteLog(data, extraPoints, 'upvote');
             ReputationManager.logVote(voteLog, function (err) {
                 if (err) {
                     winston.error('[nodebb-reputation-rules] Error saving vote log: ' + err.message);
@@ -91,22 +128,13 @@ plugin.downvote = function (vote) {
                 winston.error('[nodebb-reputation-rules] Error reducing author\'s reputation on downvote');
             }
 
-            console.log('penalization:' + Config.downvotePenalization());
             decreaseUserReputation(data.user.uid, Config.downvotePenalization(), function (err) {
                 if (err) {
                     winston.error('[nodebb-reputation-rules] Error reducing voter\'s rep (penalization) on downvote');
                 }
 
                 //log this operation so we can undo it in the future
-                var voteLog = {
-                    'date': new Date(),
-                    'voterId': data.user.uid,
-                    'authorId': data.author.uid,
-                    'topicId': parseInt(data.post.tid),
-                    'postId': data.post.pid,
-                    'type': 'downvote',
-                    'amount': extraPoints
-                };
+                var voteLog = new VoteLog(data, extraPoints, 'downvote');
                 ReputationManager.logVote(voteLog, function (err) {
                     if (err) {
                         winston.error('[nodebb-reputation-rules] Error saving vote log: ' + err.message);
@@ -172,75 +200,6 @@ plugin.unvote = function (vote) {
     });
 };
 
-plugin.filterUpvote = function (command, callback) {
-    var vote = getVoteFromCommand(command);
-    winston.info('filter.post.upvote - user id: ' + vote.uid + ', post id: ' + vote.pid);
-
-    var reputationParams = new ReputationParams(vote.uid, vote.pid);
-    reputationParams.recoverParams(function (err, data) {
-        if (err) {
-            winston.error('[nodebb-reputation-rules] Error on upvote filter hook');
-            var translated = translator.translate('unknownError', 'en_GB');
-            callback(new Error(translated));
-            return;
-        }
-
-        ReputationManager.userCanUpvotePost(data.user, data.post, function (result) {
-            if (!result.allowed) {
-                winston.info('[nodebb-reputation-rules] upvote not allowed');
-                users.getSettings(data.user.uid, function (err, settings) {
-                    var translated = translator.translate(result.reason, settings.userLang);
-                    callback(new Error(translated));
-                });
-            } else {
-                callback(null, command);
-            }
-        });
-    });
-};
-
-plugin.filterDownvote = function (command, callback) {
-    var vote = getVoteFromCommand(command);
-    winston.info('filter.post.downvote - user id: ' + vote.uid + ', post id: ' + vote.pid);
-
-    var reputationParams = new ReputationParams(vote.uid, vote.pid);
-    reputationParams.recoverParams(function (err, data) {
-        if (err) {
-            winston.error('[nodebb-reputation-rules] Error on downvote filter hook');
-            var translated = translator.translate('unknownError', 'en_GB');
-            callback(new Error(translated));
-            return;
-        }
-
-        ReputationManager.userCanDownvotePost(data.user, data.post, function (result) {
-            if (!result.allowed) {
-                winston.info('[nodebb-reputation-rules] downvote not allowed');
-                users.getSettings(data.user.uid, function (err, settings) {
-                    var translated = translator.translate(result.reason, settings.userLang);
-                    callback(new Error(translated));
-                });
-            } else {
-                callback(null, command);
-            }
-        });
-    });
-};
-
-plugin.filterUnvote = function (command, callback) {
-    //unvote is always allowed, isn't it?
-    winston.info('filter.post.unvote');
-
-    callback(null, command);
-};
-
-function getVoteFromCommand(command) {
-    return {
-        uid: command.uid,
-        pid: command.data.pid,
-        tid: command.data.room_id.replace('topic_', '')
-    };
-}
-
 plugin.adminHeader = function (custom_header, callback) {
     custom_header.plugins.push({
         "route": '/plugins/reputation-rules',
@@ -249,35 +208,6 @@ plugin.adminHeader = function (custom_header, callback) {
     });
 
     callback(null, custom_header);
-};
-
-plugin.onLoad = function (params, callback) {
-    ReputationManager = new (require('./ReputationManager'))(Config);
-
-    var app = params.app,
-        router = params.router,
-        middleware = params.middleware;
-
-    function renderAdmin(req, res, next) {
-        res.render('admin/plugins/reputation-rules', {});
-    }
-
-    router.get('/admin/plugins/reputation-rules', middleware.admin.buildHeader, renderAdmin);
-    router.get('/api/admin/plugins/reputation-rules', renderAdmin);
-
-    SocketAdmin.settings.syncReputationRules = function () {
-        pluginSettings.sync(function () {
-            winston.info("[reputation-rules] settings updated");
-            Config.setSettings(pluginSettings.get());
-        });
-    };
-
-    var defaultSettings = Config.getSettings();
-    pluginSettings = new Settings('reputation-rules', plugin.settingsVersion, defaultSettings, function () {
-        winston.info("[reputation-rules] settings loaded");
-        Config.setSettings(pluginSettings.get());
-        callback();
-    });
 };
 
 /* ----------------------------------------------------------------------------------- */
