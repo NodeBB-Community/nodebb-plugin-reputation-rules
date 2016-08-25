@@ -1,4 +1,4 @@
-[![npm version](https://badge.fury.io/js/nodebb-plugin-reputation-rules.svg)](https://badge.fury.io/js/nodebb-plugin-reputation-rules) [![Code Climate](https://codeclimate.com/github/exo-do/nodebb-plugin-reputation-rules/badges/gpa.svg)](https://codeclimate.com/github/exo-do/nodebb-plugin-reputation-rules)
+[![npm version](https://badge.fury.io/js/nodebb-plugin-reputation-rules.svg)](https://badge.fury.io/js/nodebb-plugin-reputation-rules) [![Code Climate](https://codeclimate.com/github/exo-do/nodebb-plugin-reputation-rules/badges/gpa.svg?nocache=true)](https://codeclimate.com/github/exo-do/nodebb-plugin-reputation-rules)
 
 # Reputation Rules Plugin for NodeBB
 
