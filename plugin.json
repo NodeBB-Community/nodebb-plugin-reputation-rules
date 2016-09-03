@@ -33,8 +33,5 @@
       "hook": "static:app.load", "method": "onLoad"
     }
   ],
-  "nbbpm": {
-    "compatibility": "^1.0.x || ^1.1.x"
-  },
   "templates": "./public/templates"
 }
