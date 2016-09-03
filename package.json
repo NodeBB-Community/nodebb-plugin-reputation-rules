@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/exo-do/nodebb-plugin-reputation-rules/issues"
   },
-  "readmeFilename": "README.md"
+  "readmeFilename": "README.md",
+  "nbbpm": {
+    "compatibility":   "^1.1.0"
+  }
 }
