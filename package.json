@@ -22,6 +22,6 @@
   },
   "readmeFilename": "README.md",
   "nbbpm": {
-    "compatibility":   "^1.1.0"
-  }
+    "compatibility": "^1.0.x || ^1.1.x"
+  },
 }
