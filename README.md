@@ -4,6 +4,8 @@
 
 > Rules to prevent abuse of the reputation system and reward most valuable users.
 
+![Screenshot](https://raw.githubusercontent.com/exo-do/nodebb-plugin-reputation-rules/master/reputation-rules-acp.png)
+
 ### Rule #1 
 **Upvoting** In order to upvote, the user must have  
  - {MIN_POSTS_TO_UPVOTE} posts or more
