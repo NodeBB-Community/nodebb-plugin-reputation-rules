@@ -11,7 +11,8 @@ var MIN_POSTS_TO_UPVOTE = 20,
     REP_LOG_NAMESPACE = "reputationLog",
     DISABLED_CATEGORIES_IDS = [],
     MAX_POINTS_FOR_UPVOTE = 10,
-    MAX_POINTS_FOR_DOWNVOTE = 10;
+    MAX_POINTS_FOR_DOWNVOTE = 10,
+    MAX_POST_AGE_DAYS = 0; // 0 means disabled
 
 var Config = {
     minPostToDownvote: function () {
@@ -84,6 +85,9 @@ var Config = {
     getDisabledCategories: function () {
         return DISABLED_CATEGORIES_IDS;
     },
+    getMaxPostAgeDays: function() {
+        return MAX_POST_AGE_DAYS;
+    },
     getSettings: function () {
         var settings = {};
         settings.minPostsToUpvote = MIN_POSTS_TO_UPVOTE;
@@ -100,6 +104,7 @@ var Config = {
         settings.repLogNamespace = REP_LOG_NAMESPACE;
         settings.maxUpvoteWeigh = MAX_POINTS_FOR_UPVOTE;
         settings.maxDownvoteWeigh = MAX_POINTS_FOR_DOWNVOTE;
+        settings.maxPostAgeDays = MAX_POST_AGE_DAYS;
         return settings;
     },
     setSettings: function (settings) {
@@ -116,6 +121,7 @@ var Config = {
         DISABLED_CATEGORIES_IDS = intArray(settings.disabledCategoriesIds);
         MAX_POINTS_FOR_UPVOTE = settings.maxUpvoteWeigh;
         MAX_POINTS_FOR_DOWNVOTE = settings.maxDownvoteWeigh;
+        MAX_POST_AGE_DAYS = parseInt(settings.maxPostAgeDays, 10) || 0;
     }
 };
 

@@ -88,6 +88,15 @@ var UserVotingPermissions = function (Config, db, user, post) {
         else callback();
     };
 
+    this.postIsNotTooOld = function (callback) {
+        if (Config.getMaxPostAgeDays() === 0) return callback();
+
+        var now = new Date();
+        var postAgeDays = (now - _this.post.timestamp)/24/60/60/1000;
+        if (postAgeDays > Config.getMaxPostAgeDays()) callback({'reason': 'postTooOld'});
+        else callback();
+    };
+
     function countVotesInThread(userId, threadId, callback) {
         var voteIdentifier = Config.getPerThreadLogId(userId, threadId);
         db.getSetMembers(voteIdentifier, function (err, setMembers) {

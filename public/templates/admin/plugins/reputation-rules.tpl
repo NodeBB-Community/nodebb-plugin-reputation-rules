@@ -138,6 +138,14 @@
                     <div data-key="disabledCategoriesIds" data-attributes='{"data-type":"input", "style":"width:80%;margin-bottom:10px;"}' data-split="<br>" data-new='' style="width:100%;"></div>
                     <br>
                 </div>
+
+                <div class="form-group">
+                    <!-- (MAX_POST_AGE_DAYS) -->
+                    <label>Maximum post age, in number of days, to allow votes:</label>
+                    <input class="form-control" type="number" data-key="maxPostAgeDays" title="Maximum post age, in number of days, to allow votes">
+                    <p class="help-block">Enter zero to disable this and allow votes to any post. Unvotes are ALWAYS allowed.</p>
+                    <br>
+                </div>
             </div>
         </div>
 

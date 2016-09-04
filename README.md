@@ -47,5 +47,10 @@ Undoing votes:
 ### Rule #10 
 Upvotes and downvotes should have a maximum weigh, configurable. So that rule **#8** doesn't make vote points tend to infinity.
 
+### Rule #11 
+Optional: you can limit upvotes and downvotes to recent posts. In other words, if a message is too old, users won't be able to vote it. 
+You can configure what "too old" means for you, for example 30 days, 90 days, or 0 if you want to disable this feature and allow votes in old posts.  
+**Note** unvotes are always allowed.
+
 ### (TO-DO)
 - Ban for low reputation

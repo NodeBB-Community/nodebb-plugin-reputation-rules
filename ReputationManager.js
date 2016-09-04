@@ -14,7 +14,8 @@ var ReputationManager = function (Config) {
                 userPermissions.isOldEnoughToUpvote,
                 userPermissions.hasVotedTooManyPostsInThread,
                 userPermissions.hasVotedAuthorTooManyTimesThisMonth,
-                userPermissions.hasVotedTooManyTimesToday
+                userPermissions.hasVotedTooManyTimesToday,
+                userPermissions.postIsNotTooOld
             ],
             function (err) {
                 if (err) {
@@ -41,7 +42,8 @@ var ReputationManager = function (Config) {
                 userPermissions.hasEnoughReputationToDownvote,
                 userPermissions.hasVotedTooManyPostsInThread,
                 userPermissions.hasVotedAuthorTooManyTimesThisMonth,
-                userPermissions.hasVotedTooManyTimesToday
+                userPermissions.hasVotedTooManyTimesToday,
+                userPermissions.postIsNotTooOld
             ],
             function (err) {
                 if (err) {
