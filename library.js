@@ -1,6 +1,6 @@
 "use strict";
 
-var plugin = {'settingsVersion': '1.1.0'},
+var plugin = {'settingsVersion': '1.1.1'},
     db = module.parent.require('./database'),
     users = module.parent.require('./user'),
     meta = module.parent.require('./meta'),
@@ -59,7 +59,7 @@ plugin.filterUnvote = function (command, callback) {
 };
 
 plugin.upvote = function (vote) {
-    winston.info('[hook:upvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
+    //winston.info('[hook:upvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
     var reputationParams = new ReputationParams(vote.uid, vote.pid);
     reputationParams.recoverParams(function (err, data) {
@@ -101,7 +101,7 @@ plugin.upvote = function (vote) {
 };
 
 plugin.downvote = function (vote) {
-    winston.info('[hook:downvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
+    //winston.info('[hook:downvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
     var reputationParams = new ReputationParams(vote.uid, vote.pid);
     reputationParams.recoverParams(function (err, data) {
@@ -147,7 +147,7 @@ plugin.downvote = function (vote) {
 };
 
 plugin.unvote = function (vote) {
-    winston.info('[hook:unvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
+    //winston.info('[hook:unvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
     /* how to undo a vote:
      CASE upvote: reduce author's reputation in case he won extra points when upvoted ({UPVOTE_EXTRA_PERCENTAGE})
@@ -248,7 +248,7 @@ function decreaseUserReputation(uid, amount, callback) {
         return callback();
     }
 
-    winston.info("decrease user's reputation (" + uid + ") by " + amount);
+    //winston.info("decrease user's reputation (" + uid + ") by " + amount);
     users.decrementUserFieldBy(uid, 'reputation', amount, function (err, newreputation) {
         if (err) {
             callback(err);
@@ -268,7 +268,7 @@ function increaseUserReputation(uid, amount, callback) {
         return callback();
     }
 
-    winston.info("increase user's reputation (" + uid + ") by " + amount);
+    //winston.info("increase user's reputation (" + uid + ") by " + amount);
     users.incrementUserFieldBy(uid, 'reputation', amount, function (err, newreputation) {
         if (err) {
             callback(err);
