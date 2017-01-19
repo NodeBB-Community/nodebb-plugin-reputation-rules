@@ -1,6 +1,6 @@
 "use strict";
 
-var plugin = {'settingsVersion': '1.1.1'},
+var plugin = {'settingsVersion': '1.1.2'},
     db = module.parent.require('./database'),
     users = module.parent.require('./user'),
     meta = module.parent.require('./meta'),

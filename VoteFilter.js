@@ -15,7 +15,7 @@ function getVoteFromCommand(command) {
 var VoteFilter = function(ReputationManager, users) {
     this.filterUpvote = function (command, callback) {
         var vote = getVoteFromCommand(command);
-        winston.info('filter.post.upvote - user id: ' + vote.uid + ', post id: ' + vote.pid);
+        //winston.info('filter.post.upvote - user id: ' + vote.uid + ', post id: ' + vote.pid);
 
         var reputationParams = new ReputationParams(vote.uid, vote.pid);
         reputationParams.recoverParams(function (err, data) {
@@ -28,7 +28,7 @@ var VoteFilter = function(ReputationManager, users) {
 
             ReputationManager.userCanUpvotePost(data.user, data.post, function (result) {
                 if (!result.allowed) {
-                    winston.info('[nodebb-reputation-rules] upvote not allowed');
+                    //winston.info('[nodebb-reputation-rules] upvote not allowed');
                     users.getSettings(data.user.uid, function (err, settings) {
                         var translated = translator.translate(result.reason, settings.userLang);
                         callback(new Error(translated));
@@ -42,7 +42,7 @@ var VoteFilter = function(ReputationManager, users) {
 
     this.filterDownvote = function (command, callback) {
         var vote = getVoteFromCommand(command);
-        winston.info('filter.post.downvote - user id: ' + vote.uid + ', post id: ' + vote.pid);
+        //winston.info('filter.post.downvote - user id: ' + vote.uid + ', post id: ' + vote.pid);
 
         var reputationParams = new ReputationParams(vote.uid, vote.pid);
         reputationParams.recoverParams(function (err, data) {
@@ -55,7 +55,7 @@ var VoteFilter = function(ReputationManager, users) {
 
             ReputationManager.userCanDownvotePost(data.user, data.post, function (result) {
                 if (!result.allowed) {
-                    winston.info('[nodebb-reputation-rules] downvote not allowed');
+                    //winston.info('[nodebb-reputation-rules] downvote not allowed');
                     users.getSettings(data.user.uid, function (err, settings) {
                         var translated = translator.translate(result.reason, settings.userLang);
                         callback(new Error(translated));
@@ -69,7 +69,7 @@ var VoteFilter = function(ReputationManager, users) {
 
     this.filterUnvote = function (command, callback) {
         //unvote is always allowed, isn't it?
-        winston.info('filter.post.unvote');
+        //winston.info('filter.post.unvote');
 
         callback(null, command);
     };
