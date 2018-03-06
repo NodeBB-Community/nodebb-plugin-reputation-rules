@@ -214,9 +214,8 @@ plugin.adminHeader = function (custom_header, callback) {
 function undoUpvote(user, author, post, callback) {
     //find extra vote value
     ReputationManager.findVoteLog(user, author, post, function (err, voteLog) {
-        if (err) {
-            callback(err);
-            return;
+        if (err || !voteLog) {
+            return callback(err);
         }
 
         var amount = voteLog.amount;
@@ -228,9 +227,8 @@ function undoUpvote(user, author, post, callback) {
 function undoDownvote(user, author, post, callback) {
     //find extra vote value
     ReputationManager.findVoteLog(user, author, post, function (err, voteLog) {
-        if (err) {
-            callback(err);
-            return;
+        if (err || !voteLog) {
+            return callback(err);
         }
 
         var amount = voteLog.amount;
