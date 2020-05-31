@@ -1,6 +1,6 @@
 'use strict';
 
-var db = module.parent.parent.require('./database'),
+var db = require.main.require('./src/database'),
     async = require('async'),
     UserVotingPermissions = require('./UserVotingPermissions.js');
 

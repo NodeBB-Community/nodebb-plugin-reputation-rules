@@ -1,13 +1,13 @@
 "use strict";
 
-var plugin = {'settingsVersion': '1.1.2'},
-    db = module.parent.require('./database'),
-    users = module.parent.require('./user'),
-    meta = module.parent.require('./meta'),
-    Settings = module.parent.require('./settings'),
-    SocketAdmin = module.parent.require('./socket.io/admin'),
+var plugin = {'settingsVersion': '1.1.3'},
+    db = require.main.require('./src/database'),
+    users = require.main.require('./src/user'),
+    meta = require.main.require('./src/meta'),
+    Settings = require.main.require('./src/settings'),
+    SocketAdmin = require.main.require('./src/socket.io/admin'),
 
-    winston = require('winston'),
+    winston = require.main.require('winston'),
 
     ReputationParams = require('./ReputationParams'),
     VoteLog = require('./VoteLog'),
@@ -285,7 +285,7 @@ function banUserForLowReputation(uid, newreputation) {
             if (err || parseInt(banned, 10) === 1) {
                 return;
             }
-            var adminUser = module.parent.require('./socket.io/admin/user');
+            var adminUser = require.main.require('./src/socket.io/admin/user');
             adminUser.banUser(uid, function (err) {
                 if (err) {
                     return winston.error(err.message);

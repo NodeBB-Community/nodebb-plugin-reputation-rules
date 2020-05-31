@@ -1,6 +1,6 @@
 "use strict";
 
-var winston = require('winston'),
+var winston = require.main.require('winston'),
     ReputationParams = require('./ReputationParams'),
     translator = require('./translator');
 
