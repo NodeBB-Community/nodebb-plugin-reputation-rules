@@ -6,6 +6,7 @@
   "tooManyVotesInThread": "You can't vote more messages in this thread",
   "tooManyVotesToSameUserThisMonth": "You can't vote this user again until next month",
   "tooManyVotesToday": "You can't vote more messages today",
+  "tooManyDownvotesToday": "You can't downvote more messages today",
   "postTooOld": "You can't vote this message, it is too old",
   "unknownError": "Error voting"
 }

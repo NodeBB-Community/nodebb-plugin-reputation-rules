@@ -86,6 +86,11 @@ var Config = {
         var today = now.getDate() + "-" + (now.getMonth() + 1) + "-" + now.getFullYear();
         return REP_LOG_NAMESPACE + ":user:" + voterId + ":day:" + today;
     },
+    getPerUserAndTypeLogId: function (voterId, voteType) {
+        var now = new Date();
+        var today = now.getDate() + "-" + (now.getMonth() + 1) + "-" + now.getFullYear();
+        return REP_LOG_NAMESPACE + ":user:" + voterId + ":day:" + today + ':type:' + voteType;
+    },
     getDisabledCategories: function () {
         return DISABLED_CATEGORIES_IDS;
     },
