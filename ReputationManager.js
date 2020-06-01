@@ -197,12 +197,14 @@ var ReputationManager = function (Config) {
 
     function removeUserVoteLog(vote, callback) {
         var userKey = Config.getPerUserLogId(vote.voterId);
-        var userAndVoteTypeKey = Config.getPerUserAndTypeLogId(vote.voterId, vote.type);
+        var userUpvoteKey = Config.getPerUserAndTypeLogId(vote.voterId, 'upvote');
+        var userDownvoteKey = Config.getPerUserAndTypeLogId(vote.voterId, 'downvote');
         var value = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
 
         async.series([
                 setRemove.bind(null, userKey, value),
-                setRemove.bind(null, userAndVoteTypeKey, value)
+                setRemove.bind(null, userUpvoteKey, value),
+                setRemove.bind(null, userDownvoteKey, value)
             ],
             function (err) {
                 if (err) {
