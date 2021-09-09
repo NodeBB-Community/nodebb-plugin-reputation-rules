@@ -1,12 +1,5 @@
 <form id="reputation-rules">
     <div class="settings">
-
-        <div class="row">
-            <div class="col-sm-12 col-xs-12">
-                <p class="alert alert-info">Remember that upvotes give +1 point and downvotes -1 to the author. That is by default and w .</p>
-            </div>
-        </div>
-
         <div class="row">
             <div class="col-sm-2 col-xs-12 content-header">
                 Contents
@@ -14,16 +7,19 @@
             <div class="col-sm-10 col-xs-12">
                 <nav class="section-content">
                     <ul>
+                        <li><a href="#upvoting">Upvoting</a></li>
                         <li><a href="#upvoting-permissions">Upvoting Permissions</a></li>
-                        <li><a href="#upvotes">Upvotes</a></li>
+                        <li><a href="#upvotes">Upvote weight</a></li>
+                        <li><a href="#downvoting">Downvoting</a></li>
                         <li><a href="#downvoting-permissions">Downvoting Permissions</a></li>
-                        <li><a href="#downvotes">Downvotes</a></li>
+                        <li><a href="#downvotes">Downvote weight</a></li>
                         <li><a href="#global-configuration">Global Configuration</a></li>
-                        <li><a href="#save-reload">Save and Reload</a></li>
                     </ul>
                 </nav>
             </div>
         </div>
+
+        <h1><a name="upvoting"></a>Upvoting</h1>
 
         <div class="row">
             <div class="col-sm-2 col-xs-12 settings-header"><a name="upvoting-permissions"></a>Upvoting Permissions</div>
@@ -45,7 +41,7 @@
         </div>
 
         <div class="row">
-            <div class="col-sm-2 col-xs-12 settings-header"><a name="upvotes"></a>Upvotes</div>
+            <div class="col-sm-2 col-xs-12 settings-header"><a name="upvotes"></a>Upvote weight</div>
             <div class="col-sm-10 col-xs-12">
                 <div class="form-group">
                     <!-- (UPVOTE_EXTRA_PERCENTAGE) -->
@@ -64,6 +60,8 @@
                 </div>
             </div>
         </div>
+
+        <h1><a name="downvoting"></a>Downvoting</h1>
 
         <div class="row">
             <div class="col-sm-2 col-xs-12 settings-header"><a name="downvoting-permissions"></a>Downvoting Permissions</div>
@@ -99,7 +97,7 @@
         </div>
 
         <div class="row">
-            <div class="col-sm-2 col-xs-12 settings-header"><a name="downvotes"></a>Downvotes</div>
+            <div class="col-sm-2 col-xs-12 settings-header"><a name="downvotes"></a>Downvote weight</div>
             <div class="col-sm-10 col-xs-12">
                 <div class="form-group">
                     <!-- (DOWNVOTE_EXTRA_PERCENTAGE) -->
@@ -110,25 +108,27 @@
                 </div>
 
                 <div class="form-group">
-                    <!-- (DOWNVOTE_PENALIZATION) -->
-                    <label>Downvote penalization (amount of points to remove from user who downvotes):</label>
-                    <input class="form-control" type="number" data-key="downvotePenalization" title="Downvote penalization">
-                    <p class="help-block">Think of this as the cost of downvoting, so users don't downvote just for fun.</p>
-                    <br>
-                </div>
-
-                <div class="form-group">
                     <!-- (MAX_POINTS_FOR_DOWNVOTE) -->
                     <label>Max downvote weight (points):</label>
                     <input class="form-control" type="number" data-key="maxDownvoteWeight" title="Max downvote points">
                     <p class="help-block">If this max is 10, a downvote will subtract up to 11 points (1 by default plus 10 extra).</p>
                     <br>
                 </div>
+
+                <div class="form-group">
+                    <!-- (DOWNVOTE_PENALIZATION) -->
+                    <label>Downvote penalization (amount of points to remove from user who downvotes):</label>
+                    <input class="form-control" type="number" data-key="downvotePenalization" title="Downvote penalization">
+                    <p class="help-block">Think of this as the cost of downvoting, so users don't downvote just for fun.</p>
+                    <br>
+                </div>
             </div>
         </div>
 
+        <h1><a name="global-configuration"></a>Global configuration</h1>
+
         <div class="row">
-            <div class="col-sm-2 col-xs-12 settings-header"><a name="global-configuration"></a>Global Configuration</div>
+            <div class="col-sm-2 col-xs-12 settings-header">Global Configuration</div>
             <div class="col-sm-10 col-xs-12">
                 <div class="form-group">
                     <!-- RULE 4 -->
@@ -171,18 +171,9 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-sm-2 col-xs-12 settings-header"><a name="save-reload"></a>Apply settings</div>
-            <div class="col-sm-10 col-xs-12">
-                <div class="form-group">
-                    <div class="col-xs-12 col-md-6 form-group">
-                        <button type="button" class="btn btn-success form-control" id="save">
-                            <i class="fa fa-fw fa-save"></i> Save and Apply
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <button id="save" class="floating-button mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored" data-upgraded=",MaterialButton,MaterialRipple">
+        	<i class="material-icons">save</i>
+        <span class="mdl-button__ripple-container"><span class="mdl-ripple"></span></span></button>
 
     </div>
 
@@ -201,7 +192,6 @@ require(['settings'], function(settings) {
     $('#clear').click( function (event) {
         $('#reputation-rules').find('input').val('');
     });
-
 
     var wrapper = $("#reputation-rules");
     settings.sync('reputation-rules', wrapper);
