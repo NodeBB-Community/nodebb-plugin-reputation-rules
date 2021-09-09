@@ -33,5 +33,6 @@
       "hook": "static:app.load", "method": "onLoad"
     }
   ],
-  "templates": "./public/templates"
+  "templates": "./public/templates",
+  "settingsRoute": "/admin/plugins/reputation-rules"
 }
