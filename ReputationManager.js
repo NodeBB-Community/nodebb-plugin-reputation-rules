@@ -62,25 +62,25 @@ var ReputationManager = function (Config) {
             });
     };
 
-    this.calculateUpvoteWeigh = function (user) {
+    this.calculateUpvoteWeight = function (user) {
         var extraRate = Config.upvoteExtraPercentage() / 100;
         var weight = Math.floor(user.reputation * extraRate);
         if (weight < 0) weight = 0;
-        if (weight > Config.maxUpvoteWeigh()) {
-            weight = Config.maxUpvoteWeigh();
+        if (weight > Config.maxUpvoteWeight()) {
+            weight = Config.maxUpvoteWeight();
         }
-        winston.verbose('[plugin-reputation-rules][calculateUpvoteWeigh] current voter reputation: ' + user.reputation+ ', upvote extra weight: ' + weight);
+        winston.verbose('[plugin-reputation-rules][calculateUpvoteWeight] current voter reputation: ' + user.reputation+ ', upvote extra weight: ' + weight);
         return weight;
     };
 
-    this.calculateDownvoteWeigh = function (user) {
+    this.calculateDownvoteWeight = function (user) {
         var extraRate = Config.downvoteExtraPercentage() / 100;
         var weight = Math.floor(user.reputation * extraRate);
         if (weight < 0) weight = 0;
-        if (weight > Config.maxDownvoteWeigh()) {
-            weight = Config.maxDownvoteWeigh();
+        if (weight > Config.maxDownvoteWeight()) {
+            weight = Config.maxDownvoteWeight();
         }
-        winston.verbose('[plugin-reputation-rules][calculateDownvoteWeigh] current voter reputation: ' + user.reputation+ ', downvote extra weight: ' + weight);
+        winston.verbose('[plugin-reputation-rules][calculateDownvoteWeight] current voter reputation: ' + user.reputation+ ', downvote extra weight: ' + weight);
         return weight;
     };
 

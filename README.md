@@ -50,7 +50,7 @@ Undoing votes:
  - undoing a downvote should remove penalization to voter and give the extra reputation the author lost when he got the downvote
 
 ### Rule #10
-Upvotes and downvotes should have a maximum weigh, configurable. So that rule **#8** doesn't make vote points tend to infinity.
+Upvotes and downvotes should have a maximum weight, configurable. So that rule **#8** doesn't make vote points tend to infinity.
 
 ### Rule #11
 Optional: you can limit upvotes and downvotes to recent posts. In other words, if a message is too old, users won't be able to vote it.
@@ -58,6 +58,14 @@ You can configure what "too old" means for you, for example 30 days, 90 days, or
 **Note** unvotes are always allowed.
 
 ### Changelog
+
+v1.2.1
+
+ - Fix typos on "weigh"
+ - Add a section for Rule 4 on the settings panel. It is not configurable but it is a rule that is being applied
+ - Added explanations for most of the settings so they are easier to understand
+
+v1.2.0
 
  - Updated compatibility to 1.18.2
  - Removed the "Reload" button in the ACP as this is no longer needed
