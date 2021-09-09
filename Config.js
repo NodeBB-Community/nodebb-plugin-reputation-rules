@@ -60,10 +60,10 @@ var Config = {
     downvotePenalization: function () {
         return DOWNVOTE_PENALIZATION;
     },
-    maxUpvoteWeigh: function () {
+    maxUpvoteWeight: function () {
         return MAX_POINTS_FOR_UPVOTE;
     },
-    maxDownvoteWeigh: function () {
+    maxDownvoteWeight: function () {
         return MAX_POINTS_FOR_DOWNVOTE;
     },
     getMainLogId: function (voterId, authorId, topicId, postId) {
@@ -112,8 +112,8 @@ var Config = {
         settings.downvotePenalization = DOWNVOTE_PENALIZATION;
         settings.disabledCategoriesIds = DISABLED_CATEGORIES_IDS;
         settings.repLogNamespace = REP_LOG_NAMESPACE;
-        settings.maxUpvoteWeigh = MAX_POINTS_FOR_UPVOTE;
-        settings.maxDownvoteWeigh = MAX_POINTS_FOR_DOWNVOTE;
+        settings.maxUpvoteWeight = MAX_POINTS_FOR_UPVOTE;
+        settings.maxDownvoteWeight = MAX_POINTS_FOR_DOWNVOTE;
         settings.maxPostAgeDays = MAX_POST_AGE_DAYS;
         return settings;
     },
@@ -130,8 +130,8 @@ var Config = {
         DOWNVOTE_EXTRA_PERCENTAGE = settings.downvoteExtraPercentage;
         DOWNVOTE_PENALIZATION = settings.downvotePenalization;
         DISABLED_CATEGORIES_IDS = intArray(settings.disabledCategoriesIds);
-        MAX_POINTS_FOR_UPVOTE = settings.maxUpvoteWeigh;
-        MAX_POINTS_FOR_DOWNVOTE = settings.maxDownvoteWeigh;
+        MAX_POINTS_FOR_UPVOTE = settings.maxUpvoteWeight;
+        MAX_POINTS_FOR_DOWNVOTE = settings.maxDownvoteWeight;
         MAX_POST_AGE_DAYS = parseInt(settings.maxPostAgeDays, 10) || 0;
     }
 };

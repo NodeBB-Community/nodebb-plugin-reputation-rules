@@ -78,7 +78,7 @@ plugin.upvote = function (vote) {
         }
 
         //calculate extra reputation points (depends on user who votes)
-        var extraPoints = ReputationManager.calculateUpvoteWeigh(data.user);
+        var extraPoints = ReputationManager.calculateUpvoteWeight(data.user);
 
         //give extra points to author!
         increaseUserReputation(data.author.uid, extraPoints, function (err) {
@@ -122,7 +122,7 @@ plugin.downvote = function (vote) {
         //and now the downvote:
         // reduce author's reputation by {DOWNVOTE_EXTRA_PERCENTAGE}
         // reduce voter's reputation by {DOWNVOTE_PENALIZATION}
-        var extraPoints = ReputationManager.calculateDownvoteWeigh(data.user);
+        var extraPoints = ReputationManager.calculateDownvoteWeight(data.user);
         decreaseUserReputation(data.author.uid, extraPoints, function (err) {
             if (err) {
                 winston.error('[nodebb-reputation-rules] Error reducing author\'s reputation on downvote');

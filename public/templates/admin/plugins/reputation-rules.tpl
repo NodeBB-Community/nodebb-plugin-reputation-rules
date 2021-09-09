@@ -3,7 +3,7 @@
 
         <div class="row">
             <div class="col-sm-12 col-xs-12">
-                <p class="alert alert-info">Settings apply immediately after <strong>saving</strong> at the bottom of this page.</p>
+                <p class="alert alert-info">Remember that upvotes give +1 point and downvotes -1 to the author. That is by default and w .</p>
             </div>
         </div>
 
@@ -49,15 +49,17 @@
             <div class="col-sm-10 col-xs-12">
                 <div class="form-group">
                     <!-- (UPVOTE_EXTRA_PERCENTAGE) -->
-                    <label>Percentage of voter's reputation that is added as extra (upvote weigh):</label>
-                    <input class="form-control" type="number" data-key="upvoteExtraPercentage" title="Upvote weigh">
+                    <label>Percentage of voter's reputation that is added as extra (upvote weight):</label>
+                    <input class="form-control" type="number" data-key="upvoteExtraPercentage" title="Upvote weight">
+                    <p class="help-block">This extra is added on top of the +1 that NodeBB gives by default.</p>
                     <br>
                 </div>
 
                 <div class="form-group">
                     <!-- (MAX_POINTS_FOR_UPVOTE) -->
-                    <label>Max upvote weigh (points):</label>
-                    <input class="form-control" type="number" data-key="maxUpvoteWeigh" title="Max upvote points">
+                    <label>Max upvote weight (points):</label>
+                    <input class="form-control" type="number" data-key="maxUpvoteWeight" title="Max upvote points">
+                    <p class="help-block">If this max is 10, an upvote will give up to 11 points (1 by default plus 10 extra).</p>
                     <br>
                 </div>
             </div>
@@ -101,8 +103,9 @@
             <div class="col-sm-10 col-xs-12">
                 <div class="form-group">
                     <!-- (DOWNVOTE_EXTRA_PERCENTAGE) -->
-                    <label>Percentage of voter's reputation that is substracted to post author (downvote weigh):</label>
-                    <input class="form-control" type="number" data-key="downvoteExtraPercentage" title="Downvote weigh">
+                    <label>Percentage of voter's reputation that is substracted to post author (downvote weight):</label>
+                    <input class="form-control" type="number" data-key="downvoteExtraPercentage" title="Downvote weight">
+                    <p class="help-block">This extra is subtracted from the author on top of the -1 that NodeBB takes by default.</p>
                     <br>
                 </div>
 
@@ -110,13 +113,15 @@
                     <!-- (DOWNVOTE_PENALIZATION) -->
                     <label>Downvote penalization (amount of points to remove from user who downvotes):</label>
                     <input class="form-control" type="number" data-key="downvotePenalization" title="Downvote penalization">
+                    <p class="help-block">Think of this as the cost of downvoting, so users don't downvote just for fun.</p>
                     <br>
                 </div>
 
                 <div class="form-group">
                     <!-- (MAX_POINTS_FOR_DOWNVOTE) -->
-                    <label>Max downvote weigh (points):</label>
-                    <input class="form-control" type="number" data-key="maxDownvoteWeigh" title="Max downvote points">
+                    <label>Max downvote weight (points):</label>
+                    <input class="form-control" type="number" data-key="maxDownvoteWeight" title="Max downvote points">
+                    <p class="help-block">If this max is 10, a downvote will subtract up to 11 points (1 by default plus 10 extra).</p>
                     <br>
                 </div>
             </div>
@@ -125,6 +130,14 @@
         <div class="row">
             <div class="col-sm-2 col-xs-12 settings-header"><a name="global-configuration"></a>Global Configuration</div>
             <div class="col-sm-10 col-xs-12">
+                <div class="form-group">
+                    <!-- RULE 4 -->
+                    <label>Maximum votes (up and down) allowed per user and day:</label>
+                    <p>The number depends on the formula: <em>votesPerDay = reputation/10</em> with a minimum of 5 votes per day and a max of 50.</p>
+                    <p class="help-block">This cannot be changed right now.</p>
+                    <br>
+                </div>
+
                 <div class="form-group">
                     <!-- (MAX_VOTES_PER_USER_AND_THREAD) -->
                     <label>Maximum votes allowed per user in a single thread:</label>
@@ -136,13 +149,15 @@
                     <!--(MAX_VOTES_TO_SAME_USER_PER_MONTH)-->
                     <label>Maximum amount of votes allowed to the same user each month:</label>
                     <input class="form-control" type="number" data-key="maxVotesToSameUserInMonth" title="Maximum amount of votes allowed per month to the same user">
+                    <p class="help-block">This is to prevent or limit groups of friends trading too many votes.</p>
                     <br>
                 </div>
 
                 <div class="form-group">
                     <!-- (DISABLED_CATEGORIES_IDS) -->
-                    <label>Lists of category ids where the reputation system must be disabled:</label>
+                    <label>List of category ids where the reputation system must be disabled:</label>
                     <div data-key="disabledCategoriesIds" data-attributes='{"data-type":"input", "style":"width:80%;margin-bottom:10px;"}' data-split="<br>" data-new='' style="width:100%;"></div>
+                    <p class="help-block">Some categories might not need the reputation system at all, so you can disable it here.</p>
                     <br>
                 </div>
 
@@ -162,7 +177,7 @@
                 <div class="form-group">
                     <div class="col-xs-12 col-md-6 form-group">
                         <button type="button" class="btn btn-success form-control" id="save">
-                            <i class="fa fa-fw fa-save"></i> Save Configuration
+                            <i class="fa fa-fw fa-save"></i> Save and Apply
                         </button>
                     </div>
                 </div>
