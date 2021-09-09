@@ -1,6 +1,7 @@
 'use strict';
 
 var db = require.main.require('./src/database'),
+    winston = require.main.require('winston'),
     async = require('async'),
     UserVotingPermissions = require('./UserVotingPermissions.js');
 
@@ -63,26 +64,29 @@ var ReputationManager = function (Config) {
 
     this.calculateUpvoteWeigh = function (user) {
         var extraRate = Config.upvoteExtraPercentage() / 100;
-        var weigh = Math.floor(user.reputation * extraRate);
-        if (weigh < 0) weigh = 0;
-        if (Config.maxUpvoteWeigh() > weigh) {
-            weigh = Config.maxUpvoteWeigh();
+        var weight = Math.floor(user.reputation * extraRate);
+        if (weight < 0) weight = 0;
+        if (weight > Config.maxUpvoteWeigh()) {
+            weight = Config.maxUpvoteWeigh();
         }
-        return weigh;
+        winston.verbose('[plugin-reputation-rules][calculateUpvoteWeigh] current voter reputation: ' + user.reputation+ ', upvote extra weight: ' + weight);
+        return weight;
     };
 
     this.calculateDownvoteWeigh = function (user) {
         var extraRate = Config.downvoteExtraPercentage() / 100;
-        var weigh = Math.floor(user.reputation * extraRate);
-        if (weigh < 0) weigh = 0;
-        if (Config.maxDownvoteWeigh() > weigh) {
-            weigh = Config.maxDownvoteWeigh();
+        var weight = Math.floor(user.reputation * extraRate);
+        if (weight < 0) weight = 0;
+        if (weight > Config.maxDownvoteWeigh()) {
+            weight = Config.maxDownvoteWeigh();
         }
-        return weigh;
+        winston.verbose('[plugin-reputation-rules][calculateDownvoteWeigh] current voter reputation: ' + user.reputation+ ', downvote extra weight: ' + weight);
+        return weight;
     };
 
     this.logVote = function (vote, callback) {
         vote.undone = false;
+        winston.verbose('[plugin-reputation-rules][logVote] type: ' + vote.type + ', voterId: ' + vote.voterId+ ', authorId: ' + vote.authorId + ', extra amount: ' + vote.amount);
 
         //save main object and its key in secondary sets
         async.series([
@@ -102,6 +106,7 @@ var ReputationManager = function (Config) {
 
     this.logVoteUndone = function (vote, callback) {
         vote.undone = true;
+        winston.verbose('[logVoteUndone] voterId: ' + vote.voterId+ ', authorId: ' + vote.authorId);
 
         //update main object and remove its key from secondary sets
         async.series([
@@ -118,7 +123,6 @@ var ReputationManager = function (Config) {
                 callback(null, vote);
             });
     };
-
 
     this.findVoteLog = function (user, author, post, callback) {
         var voteIdentifier = Config.getMainLogId(user.uid, author.uid, post.tid, post.pid);

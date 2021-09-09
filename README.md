@@ -1,4 +1,6 @@
-[![npm version](https://badge.fury.io/js/nodebb-plugin-reputation-rules.svg?nocache=1)](https://badge.fury.io/js/nodebb-plugin-reputation-rules) [![Code Climate](https://codeclimate.com/github/exo-do/nodebb-plugin-reputation-rules/badges/gpa.svg?nocache=1)](https://codeclimate.com/github/exo-do/nodebb-plugin-reputation-rules)
+![](https://packages.nodebb.org/api/v1/plugins/nodebb-plugin-reputation-rules/compatibility.png)
+[![npm version](https://badge.fury.io/js/nodebb-plugin-reputation-rules.svg?nocache=1)](https://badge.fury.io/js/nodebb-plugin-reputation-rules) 
+[![Code Climate](https://codeclimate.com/github/exo-do/nodebb-plugin-reputation-rules/badges/gpa.svg?nocache=1)](https://codeclimate.com/github/exo-do/nodebb-plugin-reputation-rules)
 
 # Reputation Rules Plugin for NodeBB
 
@@ -55,5 +57,10 @@ Optional: you can limit upvotes and downvotes to recent posts. In other words, i
 You can configure what "too old" means for you, for example 30 days, 90 days, or 0 if you want to disable this feature and allow votes in old posts.  
 **Note** unvotes are always allowed.
 
-### (TO-DO)
-- Ban for low reputation
+### Changelog
+
+ - Updated compatibility to 1.18.2
+ - Removed the "Reload" button in the ACP as this is no longer needed
+ - Added debug logs to track down any errors
+ - Fix: vote max weight was being used as a min, instead of a max
+ 
