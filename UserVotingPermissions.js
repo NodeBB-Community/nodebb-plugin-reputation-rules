@@ -1,17 +1,17 @@
 'use strict';
 
-var UserVotingPermissions = function (Config, db, user, post) {
+var UserVotingPermissions = function(Config, db, user, post) {
     var _this = this;
     this.user = user;
     this.post = post;
 
-    this.hasEnoughPostsToUpvote = function (callback) {
+    this.hasEnoughPostsToUpvote = function(callback) {
         var allowed = _this.user.postcount >= Config.minPostToUpvote();
         if (!allowed) callback({'reason': 'notEnoughPosts'});
         else callback();
     };
 
-    this.isOldEnoughToUpvote = function (callback) {
+    this.isOldEnoughToUpvote = function(callback) {
         var now = new Date();
         var xDaysAgo = now.getTime() - Config.minDaysToUpvote() * 24 * 60 * 60 * 1000;
 
@@ -20,7 +20,7 @@ var UserVotingPermissions = function (Config, db, user, post) {
         else callback();
     };
 
-    this.hasVotedTooManyPostsInThread = function (callback) {
+    this.hasVotedTooManyPostsInThread = function(callback) {
         countVotesInThread(_this.user.uid, _this.post.tid, function (err, userVotesInThread) {
             if (err) {
                 err.reason = 'Unknown';
@@ -33,7 +33,7 @@ var UserVotingPermissions = function (Config, db, user, post) {
         });
     };
 
-    this.hasVotedAuthorTooManyTimesThisMonth = function (callback) {
+    this.hasVotedAuthorTooManyTimesThisMonth = function(callback) {
         countVotesToAuthor(_this.user.uid, _this.post.uid, function (err, votesToAuthor) {
             if (err) {
                 err.reason = 'Unknown';
@@ -46,7 +46,7 @@ var UserVotingPermissions = function (Config, db, user, post) {
         });
     };
 
-    this.hasVotedTooManyTimesToday = function (callback) {
+    this.hasVotedTooManyTimesToday = function(callback) {
         countVotesForUser(_this.user.uid, function (err, votes) {
             if (err) {
                 err.reason = 'Unknown';
@@ -59,13 +59,13 @@ var UserVotingPermissions = function (Config, db, user, post) {
         });
     };
 
-    this.hasEnoughPostsToDownvote = function (callback) {
+    this.hasEnoughPostsToDownvote = function(callback) {
         var allowed = _this.user.postcount >= Config.minPostToDownvote();
         if (!allowed) callback({'reason': 'notEnoughPosts'});
         else callback();
     };
 
-    this.isOldEnoughToDownvote = function (callback) {
+    this.isOldEnoughToDownvote = function(callback) {
         var now = new Date();
         var xDaysAgo = now.getTime() - Config.minDaysToDownvote() * 24 * 60 * 60 * 1000;
 
@@ -74,13 +74,13 @@ var UserVotingPermissions = function (Config, db, user, post) {
         else callback();
     };
 
-    this.hasEnoughReputationToDownvote = function (callback) {
+    this.hasEnoughReputationToDownvote = function(callback) {
         var allowed = _this.user.reputation >= Config.minReputationToDownvote();
         if (!allowed) callback({'reason': 'notEnoughReputation'});
         else callback();
     };
 
-    this.votingAllowedInCategory = function (callback) {
+    this.votingAllowedInCategory = function(callback) {
         var categoryBlackList = Config.getDisabledCategories();
         var index = categoryBlackList.indexOf(_this.post.cid);
         var allowed = index === -1;
@@ -88,13 +88,28 @@ var UserVotingPermissions = function (Config, db, user, post) {
         else callback();
     };
 
-    this.postIsNotTooOld = function (callback) {
+    this.postIsNotTooOld = function(callback) {
         if (Config.getMaxPostAgeDays() === 0) return callback();
 
         var now = new Date();
         var postAgeDays = (now - _this.post.timestamp)/24/60/60/1000;
         if (postAgeDays > Config.getMaxPostAgeDays()) callback({'reason': 'postTooOld'});
         else callback();
+    };
+
+    this.hasDownvotedTooManyTimesToday = function(callback) {
+        if (Config.maxDownvotesPerDay() === 0) return callback();
+
+        countDownvotesForUser(_this.user.uid, function(err, downvotes) {
+            if (err) {
+                err.reason = 'Unknown';
+                callback(err);
+            }
+
+            var allowed = downvotes < Config.maxDownvotesPerDay();
+            if (!allowed) callback({'reason': 'tooManyDownvotesToday'});
+            else callback();
+        });
     };
 
     function countVotesInThread(userId, threadId, callback) {
@@ -121,6 +136,17 @@ var UserVotingPermissions = function (Config, db, user, post) {
 
     function countVotesForUser(userId, callback) {
         var voteIdentifier = Config.getPerUserLogId(userId);
+        db.getSetMembers(voteIdentifier, function (err, setMembers) {
+            if (err) {
+                callback(err);
+                return;
+            }
+            callback(null, setMembers.length);
+        });
+    }
+
+    function countDownvotesForUser(userId, callback) {
+        var voteIdentifier = Config.getPerUserAndTypeLogId(userId, 'downvote');
         db.getSetMembers(voteIdentifier, function (err, setMembers) {
             if (err) {
                 callback(err);

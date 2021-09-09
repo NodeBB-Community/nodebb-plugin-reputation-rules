@@ -5,6 +5,7 @@ var MIN_POSTS_TO_UPVOTE = 20,
     MIN_REPUTATION_TO_DOWNVOTE = 10,
     MAX_VOTES_PER_USER_AND_THREAD = 5,
     MAX_VOTES_TO_SAME_USER_PER_MONTH = 1,
+    MAX_DOWNVOTES_PER_DAY = 5, // 0 means disabled
     UPVOTE_EXTRA_PERCENTAGE = 5,
     DOWNVOTE_EXTRA_PERCENTAGE = 5,
     DOWNVOTE_PENALIZATION = 1,
@@ -47,6 +48,9 @@ var Config = {
         }
         return calculatedVotesPerUser;
     },
+    maxDownvotesPerDay: function () {
+        return MAX_DOWNVOTES_PER_DAY;
+    },
     upvoteExtraPercentage: function () {
         return UPVOTE_EXTRA_PERCENTAGE;
     },
@@ -82,6 +86,11 @@ var Config = {
         var today = now.getDate() + "-" + (now.getMonth() + 1) + "-" + now.getFullYear();
         return REP_LOG_NAMESPACE + ":user:" + voterId + ":day:" + today;
     },
+    getPerUserAndTypeLogId: function (voterId, voteType) {
+        var now = new Date();
+        var today = now.getDate() + "-" + (now.getMonth() + 1) + "-" + now.getFullYear();
+        return REP_LOG_NAMESPACE + ":user:" + voterId + ":day:" + today + ':type:' + voteType;
+    },
     getDisabledCategories: function () {
         return DISABLED_CATEGORIES_IDS;
     },
@@ -97,6 +106,7 @@ var Config = {
         settings.minReputationToDownvote = MIN_REPUTATION_TO_DOWNVOTE;
         settings.maxVotesPerUserInThread = MAX_VOTES_PER_USER_AND_THREAD;
         settings.maxVotesToSameUserInMonth = MAX_VOTES_TO_SAME_USER_PER_MONTH;
+        settings.maxDownvotesPerDay = MAX_DOWNVOTES_PER_DAY;
         settings.upvoteExtraPercentage = UPVOTE_EXTRA_PERCENTAGE;
         settings.downvoteExtraPercentage = DOWNVOTE_EXTRA_PERCENTAGE;
         settings.downvotePenalization = DOWNVOTE_PENALIZATION;
@@ -115,6 +125,7 @@ var Config = {
         MIN_REPUTATION_TO_DOWNVOTE = settings.minReputationToDownvote;
         MAX_VOTES_PER_USER_AND_THREAD = settings.maxVotesPerUserInThread;
         MAX_VOTES_TO_SAME_USER_PER_MONTH = settings.maxVotesToSameUserInMonth;
+        MAX_DOWNVOTES_PER_DAY = settings.maxDownvotesPerDay;
         UPVOTE_EXTRA_PERCENTAGE = settings.upvoteExtraPercentage;
         DOWNVOTE_EXTRA_PERCENTAGE = settings.downvoteExtraPercentage;
         DOWNVOTE_PENALIZATION = settings.downvotePenalization;
@@ -133,4 +144,3 @@ function intArray(arr) {
 }
 
 module.exports = Config;
-

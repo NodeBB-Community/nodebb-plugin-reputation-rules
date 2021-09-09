@@ -1,8 +1,8 @@
 'use strict';
 
 var async = require('async'),
-    User = module.parent.parent.require('./user'),
-    Posts = module.parent.parent.require('./posts');
+    User = require.main.require('./src/user'),
+    Posts = require.main.require('./src/posts');
 
 var ReputationParams = function (userId, postId) {
     var _this = this;

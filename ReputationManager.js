@@ -1,6 +1,6 @@
 'use strict';
 
-var db = module.parent.parent.require('./database'),
+var db = require.main.require('./src/database'),
     async = require('async'),
     UserVotingPermissions = require('./UserVotingPermissions.js');
 
@@ -37,6 +37,7 @@ var ReputationManager = function (Config) {
 
         async.series([
                 userPermissions.votingAllowedInCategory,
+                userPermissions.hasDownvotedTooManyTimesToday,
                 userPermissions.hasEnoughPostsToDownvote,
                 userPermissions.isOldEnoughToDownvote,
                 userPermissions.hasEnoughReputationToDownvote,
@@ -165,9 +166,21 @@ var ReputationManager = function (Config) {
     }
 
     function saveUserVoteLog(vote, callback) {
-        var key = Config.getPerUserLogId(vote.voterId);
+        var userKey = Config.getPerUserLogId(vote.voterId);
+        var userAndVoteTypeKey = Config.getPerUserAndTypeLogId(vote.voterId, vote.type);
         var value = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
-        setAdd(key, value, callback);
+
+        async.series([
+                setAdd.bind(null, userKey, value),
+                setAdd.bind(null, userAndVoteTypeKey, value)
+            ],
+            function (err) {
+                if (err) {
+                    callback(err);
+                    return;
+                }
+                callback(null, vote);
+            });
     }
 
     function removeThreadVoteLog(vote, callback) {
@@ -183,9 +196,23 @@ var ReputationManager = function (Config) {
     }
 
     function removeUserVoteLog(vote, callback) {
-        var key = Config.getPerUserLogId(vote.voterId);
+        var userKey = Config.getPerUserLogId(vote.voterId);
+        var userUpvoteKey = Config.getPerUserAndTypeLogId(vote.voterId, 'upvote');
+        var userDownvoteKey = Config.getPerUserAndTypeLogId(vote.voterId, 'downvote');
         var value = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
-        setRemove(key, value, callback);
+
+        async.series([
+                setRemove.bind(null, userKey, value),
+                setRemove.bind(null, userUpvoteKey, value),
+                setRemove.bind(null, userDownvoteKey, value)
+            ],
+            function (err) {
+                if (err) {
+                    callback(err);
+                    return;
+                }
+                callback(null, vote);
+            });
     }
 
     function setAdd(key, value, callback) {

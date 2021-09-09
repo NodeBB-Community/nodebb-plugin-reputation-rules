@@ -112,6 +112,13 @@
                     <input class="form-control" type="number" data-key="maxDownvoteWeigh" title="Max downvote points">
                     <br>
                 </div>
+
+                <div class="form-group">
+                    <!-- (MAX_DOWNVOTES_PER_DAY) -->
+                    <label>Max downvotes per user and day (0 to allow unlimited downvotes per day):</label>
+                    <input class="form-control" type="number" data-key="maxDownvotesPerDay" title="Max downvotes per day">
+                    <br>
+                </div>
             </div>
         </div>
 
@@ -176,11 +183,11 @@
 require(['settings'], function(settings) {
 
     settings.sync('reputation-rules', $('#reputation-rules'));
-    
+
     $('#reset').click( function (event) {
         $('#reputation-rules')[0].reset();
     });
-    
+
     $('#clear').click( function (event) {
         $('#reputation-rules').find('input').val('');
     });
