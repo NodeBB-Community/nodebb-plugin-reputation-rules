@@ -30,3 +30,5 @@ node_modules
 # Webstorm
 .idea
 /.project
+
+package-lock.json
