@@ -3,7 +3,7 @@
 
         <div class="row">
             <div class="col-sm-12 col-xs-12">
-                <p class="alert alert-info">Remember to <strong>save AND reload</strong> to apply changes to all running instances of NodeBB.</p>
+                <p class="alert alert-info">Settings apply immediately after <strong>saving</strong> at the bottom of this page.</p>
             </div>
         </div>
 
@@ -86,6 +86,13 @@
                     <input class="form-control" type="number" data-key="minReputationToDownvote" title="Minimum reputation to downvote">
                     <br>
                 </div>
+
+                <div class="form-group">
+                    <!-- (MAX_DOWNVOTES_PER_DAY) -->
+                    <label>Max downvotes per user and day (0 to allow unlimited downvotes per day):</label>
+                    <input class="form-control" type="number" data-key="maxDownvotesPerDay" title="Max downvotes per day">
+                    <br>
+                </div>
             </div>
         </div>
 
@@ -110,13 +117,6 @@
                     <!-- (MAX_POINTS_FOR_DOWNVOTE) -->
                     <label>Max downvote weigh (points):</label>
                     <input class="form-control" type="number" data-key="maxDownvoteWeigh" title="Max downvote points">
-                    <br>
-                </div>
-
-                <div class="form-group">
-                    <!-- (MAX_DOWNVOTES_PER_DAY) -->
-                    <label>Max downvotes per user and day (0 to allow unlimited downvotes per day):</label>
-                    <input class="form-control" type="number" data-key="maxDownvotesPerDay" title="Max downvotes per day">
                     <br>
                 </div>
             </div>
@@ -157,17 +157,12 @@
         </div>
 
         <div class="row">
-            <div class="col-sm-2 col-xs-12 settings-header"><a name="save-reload"></a>Save and Reload</div>
+            <div class="col-sm-2 col-xs-12 settings-header"><a name="save-reload"></a>Apply settings</div>
             <div class="col-sm-10 col-xs-12">
                 <div class="form-group">
                     <div class="col-xs-12 col-md-6 form-group">
                         <button type="button" class="btn btn-success form-control" id="save">
                             <i class="fa fa-fw fa-save"></i> Save Configuration
-                        </button>
-                    </div>
-                    <div class="col-xs-12 col-md-6 form-group">
-                        <button type="button" class="btn btn-info form-control" id="reload">
-                            <i class="fa fa-fw fa-refresh"></i> Reload NodeBB
                         </button>
                     </div>
                 </div>
@@ -199,13 +194,6 @@ require(['settings'], function(settings) {
         event.preventDefault();
         settings.persist('reputation-rules', wrapper, function() {
             socket.emit('admin.settings.syncReputationRules');
-        });
-    });
-
-    $('#reload').click(function(event) {
-        event.preventDefault();
-        require(['admin/modules/instance'], function(instance) {
-            instance.reload();
         });
     });
 
