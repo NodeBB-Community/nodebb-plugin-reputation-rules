@@ -81,7 +81,7 @@ plugin.upvote = async function (vote) {
         let voteLog = new VoteLog(data, extraPoints, 'upvote');
         await ReputationManager.logVote(voteLog);
     } catch (err) {
-        winston.error('[plugin-reputation-rules] Error on upvote hook');
+        winston.error('[plugin-reputation-rules] Error on upvote hook', err);
         throw err;
     }
 };
@@ -106,7 +106,7 @@ plugin.downvote = async function (vote) {
         let voteLog = new VoteLog(data, extraPoints, 'downvote');
         await ReputationManager.logVote(voteLog);
     } catch(err) {
-        winston.error('[plugin-reputation-rules] Error on downvote hook');
+        winston.error('[plugin-reputation-rules] Error on downvote hook', err);
         throw err;
     }
 };
@@ -131,7 +131,7 @@ plugin.unvote = async function (vote) {
         };
         await ReputationManager.logVoteUndone(voteLogIdentifier);
     } catch(err) {
-        winston.error('[plugin-reputation-rules] Error on unvote hook');
+        winston.error('[plugin-reputation-rules] Error on unvote hook', err);
         throw err;
     }
 };
