@@ -24,7 +24,5 @@
   "nbbpm": {
     "compatibility": "^1.18.0"
   },
-  "dependencies": {
-    "async": "^2"
-  }
+  "dependencies": {}
 }

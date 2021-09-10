@@ -1,12 +1,10 @@
 "use strict";
 
-var plugin = {'settingsVersion': '1.1.3'},
+let plugin = {'settingsVersion': '1.1.3'},
     db = require.main.require('./src/database'),
     users = require.main.require('./src/user'),
-    meta = require.main.require('./src/meta'),
     Settings = require.main.require('./src/settings'),
     SocketAdmin = require.main.require('./src/socket.io/admin'),
-
     winston = require.main.require('winston'),
 
     ReputationParams = require('./ReputationParams'),
@@ -21,7 +19,7 @@ plugin.onLoad = function (params, callback) {
     ReputationManager = new (require('./ReputationManager'))(Config);
     VoteFilter = new (require('./VoteFilter'))(ReputationManager, users);
 
-    var router = params.router,
+    let router = params.router,
         middleware = params.middleware;
 
     function renderAdmin(req, res, next) {
@@ -38,7 +36,7 @@ plugin.onLoad = function (params, callback) {
         });
     };
 
-    var defaultSettings = Config.getSettings();
+    let defaultSettings = Config.getSettings();
     pluginSettings = new Settings('reputation-rules', plugin.settingsVersion, defaultSettings, function () {
         winston.info("[reputation-rules] settings loaded");
         Config.setSettings(pluginSettings.get());
@@ -46,158 +44,102 @@ plugin.onLoad = function (params, callback) {
     });
 };
 
-plugin.filterUpvote = function (command, callback) {
-    VoteFilter.filterUpvote(command, callback);
+plugin.filterUpvote = async function (command) {
+    winston.verbose('[plugin-reputation-rules][hook:filterUpvote] user id: ' + command.uid + ', post id: ' + command.data.pid);
+
+    return await VoteFilter.filterUpvote(command);
 };
 
-plugin.filterDownvote = function (command, callback) {
-    VoteFilter.filterDownvote(command, callback);
+plugin.filterDownvote = async function (command) {
+    winston.verbose('[plugin-reputation-rules][hook:filterDownvote] user id: ' + command.uid + ', post id: ' + command.data.pid);
+
+    return await VoteFilter.filterDownvote(command);
 };
 
-plugin.filterUnvote = function (command, callback) {
-    VoteFilter.filterUnvote(command, callback);
+plugin.filterUnvote = async function (command) {
+    winston.verbose('[plugin-reputation-rules][hook:filterUnvote] user id: ' + command.uid + ', post id: ' + command.data.pid);
+
+    return await VoteFilter.filterUnvote(command);
 };
 
-plugin.upvote = function (vote) {
+plugin.upvote = async function (vote) {
     winston.verbose('[plugin-reputation-rules][hook:upvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
-    var reputationParams = new ReputationParams(vote.uid, vote.pid);
-    reputationParams.recoverParams(function (err, data) {
-        if (err) {
-            winston.error('[nodebb-reputation-rules] Error on downvote hook');
-            return;
-        }
+    let reputationParams = new ReputationParams(vote.uid, vote.pid);
 
-        //undo downvote (if needed): remove penalization to the user who downvoted
+    try {
+        let data = await reputationParams.recoverParams();
+        // undo downvote (if needed)
         if (vote.current === 'downvote') {
-            undoDownvote(data.user, data.author, data.post, function (err) {
-                if (err) {
-                    winston.error('[nodebb-reputation-rules] Error undoing downvote');
-                }
-            });
+            await undoDownvote(data.user, data.author, data.post);
         }
 
-        //calculate extra reputation points (depends on user who votes)
-        var extraPoints = ReputationManager.calculateUpvoteWeight(data.user);
+        // calculate extra reputation points
+        // and give the extra points to the author
+        let extraPoints = ReputationManager.calculateUpvoteWeight(data.user);
+        await increaseUserReputation(data.author.uid, extraPoints);
 
-        //give extra points to author!
-        increaseUserReputation(data.author.uid, extraPoints, function (err) {
-            if (err) {
-                winston.error('[nodebb-reputation-rules] Error increasing author\'s reputation on upvote');
-                return;
-            }
-
-            //log this operation so we can undo it in the future
-            var voteLog = new VoteLog(data, extraPoints, 'upvote');
-            ReputationManager.logVote(voteLog, function (err) {
-                if (err) {
-                    winston.error('[nodebb-reputation-rules] Error saving vote log: ' + err.message);
-                    winston.error(voteLog);
-                }
-            });
-
-        });
-    });
+        // log this operation so we can undo it in the future
+        let voteLog = new VoteLog(data, extraPoints, 'upvote');
+        await ReputationManager.logVote(voteLog);
+    } catch (err) {
+        winston.error('[plugin-reputation-rules] Error on upvote hook');
+        throw err;
+    }
 };
 
-plugin.downvote = function (vote) {
+plugin.downvote = async function (vote) {
     winston.verbose('[plugin-reputation-rules][hook:downvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
-    var reputationParams = new ReputationParams(vote.uid, vote.pid);
-    reputationParams.recoverParams(function (err, data) {
-        if (err) {
-            winston.error('[nodebb-reputation-rules] Error on downvote hook');
-            return;
-        }
+    let reputationParams = new ReputationParams(vote.uid, vote.pid);
 
-        //undo upvote (if any): remove author's rep won with the upvote
+    try {
+        let data = await reputationParams.recoverParams();
+        // undo upvote (if needed)
         if (vote.current === 'upvote') {
-            undoUpvote(data.user, data.author, data.post, function (err) {
-                if (err) {
-                    winston.error('[nodebb-reputation-rules] Error undoing upvote');
-                }
-            });
+            await undoUpvote(data.user, data.author, data.post);
         }
 
-        //and now the downvote:
-        // reduce author's reputation by {DOWNVOTE_EXTRA_PERCENTAGE}
-        // reduce voter's reputation by {DOWNVOTE_PENALIZATION}
-        var extraPoints = ReputationManager.calculateDownvoteWeight(data.user);
-        decreaseUserReputation(data.author.uid, extraPoints, function (err) {
-            if (err) {
-                winston.error('[nodebb-reputation-rules] Error reducing author\'s reputation on downvote');
-            }
+        // calculate weight and reduce author's reputation
+        // reduce voter's reputation (cost of downvoting)
+        let extraPoints = ReputationManager.calculateDownvoteWeight(data.user);
+        await decreaseUserReputation(data.author.uid, extraPoints);
+        await decreaseUserReputation(data.user.uid, Config.downvotePenalization());
 
-            decreaseUserReputation(data.user.uid, Config.downvotePenalization(), function (err) {
-                if (err) {
-                    winston.error('[nodebb-reputation-rules] Error reducing voter\'s rep (penalization) on downvote');
-                }
-
-                //log this operation so we can undo it in the future
-                var voteLog = new VoteLog(data, extraPoints, 'downvote');
-                ReputationManager.logVote(voteLog, function (err) {
-                    if (err) {
-                        winston.error('[nodebb-reputation-rules] Error saving vote log: ' + err.message);
-                        winston.error(voteLog);
-                    }
-                });
-            });
-        });
-    });
+        //log this operation so we can undo it in the future
+        let voteLog = new VoteLog(data, extraPoints, 'downvote');
+        await ReputationManager.logVote(voteLog);
+    } catch(err) {
+        winston.error('[plugin-reputation-rules] Error on downvote hook');
+        throw err;
+    }
 };
 
-plugin.unvote = function (vote) {
+plugin.unvote = async function (vote) {
     winston.verbose('[plugin-reputation-rules][hook:unvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
-    /* how to undo a vote:
-     CASE upvote: reduce author's reputation in case he won extra points when upvoted ({UPVOTE_EXTRA_PERCENTAGE})
-     CASE dowvote: increase author's reputation by {DOWNVOTE_EXTRA_PERCENTAGE}
-     increase voter's reputation by {DOWNVOTE_PENALIZATION}
-     */
-    var reputationParams = new ReputationParams(vote.uid, vote.pid);
-    reputationParams.recoverParams(function (err, data) {
-        if (err) {
-            winston.error('[nodebb-reputation-rules] Error on unvote hook');
-            return;
+    let reputationParams = new ReputationParams(vote.uid, vote.pid);
+
+    try {
+        let data = await reputationParams.recoverParams();
+
+        if (vote.current === 'downvote') {
+            await undoDownvote(data.user, data.author, data.post);
+        } else if (vote.current === 'upvote') {
+            await undoUpvote(data.user, data.author, data.post);
         }
 
-        var voteLogIdentifier = {
+        let voteLogIdentifier = {
             'voterId': data.user.uid,
             'authorId': data.author.uid,
             'topicId': parseInt(data.post.tid),
             'postId': data.post.pid
         };
-
-        if (vote.current === 'downvote') {
-            undoDownvote(data.user, data.author, data.post, function (err) {
-                if (err) {
-                    winston.error('[nodebb-reputation-rules] Error undoing downvote');
-                    return;
-                }
-
-                ReputationManager.logVoteUndone(voteLogIdentifier, function (err) {
-                    if (err) {
-                        winston.error('[nodebb-reputation-rules] Error updating vote log: ' + err.message);
-                        winston.error(voteLogIdentifier);
-                    }
-                });
-            });
-        } else if (vote.current === 'upvote') {
-            undoUpvote(data.user, data.author, data.post, function (err) {
-                if (err) {
-                    winston.error('[nodebb-reputation-rules] Error undoing upvote');
-                    return;
-                }
-
-                ReputationManager.logVoteUndone(voteLogIdentifier, function (err) {
-                    if (err) {
-                        winston.error('[nodebb-reputation-rules] Error updating vote log: ' + err.message);
-                        winston.error(voteLogIdentifier);
-                    }
-                });
-            });
-        }
-    });
+        await ReputationManager.logVoteUndone(voteLogIdentifier);
+    } catch(err) {
+        winston.error('[plugin-reputation-rules] Error on unvote hook');
+        throw err;
+    }
 };
 
 plugin.adminHeader = function (custom_header, callback) {
@@ -211,91 +153,53 @@ plugin.adminHeader = function (custom_header, callback) {
 };
 
 /* ----------------------------------------------------------------------------------- */
-function undoUpvote(user, author, post, callback) {
+async function undoUpvote(user, author, post) {
     winston.verbose('[plugin-reputation-rules][undoUpvote] user id: ' + user.uid);
-    //find extra vote value
-    ReputationManager.findVoteLog(user, author, post, function (err, voteLog) {
-        if (err || !voteLog) {
-            return callback(err);
-        }
 
-        var amount = voteLog.amount;
-        //decrease author's rep -extra
-        decreaseUserReputation(author.uid, amount, callback);
-    });
+    let voteLog = await ReputationManager.findVoteLog(user, author, post);
+    if (!voteLog) {
+        winston.verbose('[plugin-reputation-rules] error trying to undo upvote: vote log not found, maybe this vote was casted before the plugin was installed');
+        return;
+    }
+
+    let amount = voteLog.amount;
+    await decreaseUserReputation(author.uid, amount);
 }
 
-function undoDownvote(user, author, post, callback) {
+async function undoDownvote(user, author, post) {
     winston.verbose('[plugin-reputation-rules][undoDownvote] user id: ' + user.uid);
-    //find extra vote value
-    ReputationManager.findVoteLog(user, author, post, function (err, voteLog) {
-        if (err || !voteLog) {
-            return callback(err);
-        }
 
-        var amount = voteLog.amount;
-        //increase authors's rep
-        increaseUserReputation(author.uid, amount, function () {
-            //author reputation restored, now how about the voter penalization? must be removed too!
-            var penalization = Config.downvotePenalization();
-            increaseUserReputation(user.uid, penalization, callback);
-        });
-    });
+    let voteLog = await ReputationManager.findVoteLog(user, author, post);
+    if (!voteLog) {
+        winston.verbose('[plugin-reputation-rules] error trying to undo downvote: vote log not found, maybe this vote was casted before the plugin was installed');
+        return;
+    }
+
+    let amount = voteLog.amount;
+    await increaseUserReputation(author.uid, amount);
+    //author reputation restored, now remove voter's penalization
+    let penalization = Config.downvotePenalization();
+    await increaseUserReputation(user.uid, penalization);
 }
 
-function decreaseUserReputation(uid, amount, callback) {
+async function decreaseUserReputation(uid, amount) {
     if (amount <= 0) {
-        return callback();
+        return;
     }
 
     winston.verbose("[plugin-reputation-rules][decreaseUserReputation] decrease user's reputation (" + uid + ") by " + amount);
-    users.decrementUserFieldBy(uid, 'reputation', amount, function (err, newreputation) {
-        if (err) {
-            callback(err);
-            return;
-        }
-
-        db.sortedSetAdd('users:reputation', newreputation, uid);
-
-        banUserForLowReputation(uid, newreputation);
-
-        callback();
-    });
+    let newReputation = await users.decrementUserFieldBy(uid, 'reputation', amount);
+    await db.sortedSetAdd('users:reputation', newReputation, uid);
 }
 
-function increaseUserReputation(uid, amount, callback) {
+async function increaseUserReputation(uid, amount) {
     if (amount <= 0) {
-        return callback();
+        return;
     }
 
     winston.verbose("[plugin-reputation-rules][increaseUserReputation] increase user's reputation (" + uid + ") by " + amount);
-    users.incrementUserFieldBy(uid, 'reputation', amount, function (err, newreputation) {
-        if (err) {
-            callback(err);
-            return;
-        }
-
-        db.sortedSetAdd('users:reputation', newreputation, uid);
-
-        callback();
-    });
-}
-
-function banUserForLowReputation(uid, newreputation) {
-    if (parseInt(meta.config['autoban:downvote'], 10) === 1 && newreputation < parseInt(meta.config['autoban:downvote:threshold'], 10)) {
-        users.getUserField(uid, 'banned', function (err, banned) {
-            if (err || parseInt(banned, 10) === 1) {
-                return;
-            }
-            var adminUser = require.main.require('./src/socket.io/admin/user');
-            adminUser.banUser(uid, function (err) {
-                if (err) {
-                    return winston.error(err.message);
-                }
-                winston.info('uid ' + uid + ' was banned for reaching ' + newreputation + ' reputation');
-            });
-        });
-    }
+    let newReputation = await users.incrementUserFieldBy(uid, 'reputation', amount);
+    await db.sortedSetAdd('users:reputation', newReputation, uid);
 }
 
 module.exports = plugin;

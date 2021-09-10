@@ -1,4 +1,4 @@
-var MIN_POSTS_TO_UPVOTE = 20,
+let MIN_POSTS_TO_UPVOTE = 20,
     MIN_DAYS_TO_UPVOTE = 7,
     MIN_POSTS_TO_DOWNVOTE = 50,
     MIN_DAYS_TO_DOWNVOTE = 15,
@@ -15,7 +15,7 @@ var MIN_POSTS_TO_UPVOTE = 20,
     MAX_POINTS_FOR_DOWNVOTE = 10,
     MAX_POST_AGE_DAYS = 0; // 0 means disabled
 
-var Config = {
+let Config = {
     minPostToDownvote: function () {
         return MIN_POSTS_TO_DOWNVOTE;
     },
@@ -38,9 +38,9 @@ var Config = {
         return MAX_VOTES_TO_SAME_USER_PER_MONTH;
     },
     maxVotesPerUser: function (reputation) {
-        var MIN = 5,
+        let MIN = 5,
             MAX = 50;
-        var calculatedVotesPerUser = Math.floor(reputation / 10);
+        let calculatedVotesPerUser = Math.floor(reputation / 10);
         if (calculatedVotesPerUser < MIN) {
             calculatedVotesPerUser = MIN;
         } else if (calculatedVotesPerUser > MAX) {
@@ -77,18 +77,18 @@ var Config = {
         return REP_LOG_NAMESPACE + ":user:" + voterId + ":thread:" + topicId;
     },
     getPerAuthorLogId: function (voterId, authorId) {
-        var now = new Date();
-        var month = (now.getMonth() + 1) + "-" + now.getFullYear();
+        let now = new Date();
+        let month = (now.getMonth() + 1) + "-" + now.getFullYear();
         return REP_LOG_NAMESPACE + ":user:" + voterId + ":author:" + authorId + ":month:" + month;
     },
     getPerUserLogId: function (voterId) {
-        var now = new Date();
-        var today = now.getDate() + "-" + (now.getMonth() + 1) + "-" + now.getFullYear();
+        let now = new Date();
+        let today = now.getDate() + "-" + (now.getMonth() + 1) + "-" + now.getFullYear();
         return REP_LOG_NAMESPACE + ":user:" + voterId + ":day:" + today;
     },
     getPerUserAndTypeLogId: function (voterId, voteType) {
-        var now = new Date();
-        var today = now.getDate() + "-" + (now.getMonth() + 1) + "-" + now.getFullYear();
+        let now = new Date();
+        let today = now.getDate() + "-" + (now.getMonth() + 1) + "-" + now.getFullYear();
         return REP_LOG_NAMESPACE + ":user:" + voterId + ":day:" + today + ':type:' + voteType;
     },
     getDisabledCategories: function () {
@@ -98,7 +98,7 @@ var Config = {
         return MAX_POST_AGE_DAYS;
     },
     getSettings: function () {
-        var settings = {};
+        let settings = {};
         settings.minPostsToUpvote = MIN_POSTS_TO_UPVOTE;
         settings.minDaysToUpvote = MIN_DAYS_TO_UPVOTE;
         settings.minPostsToDownvote = MIN_POSTS_TO_DOWNVOTE;
@@ -137,7 +137,7 @@ var Config = {
 };
 
 function intArray(arr) {
-    for (var i = 0; i < arr.length; i++) {
+    for (let i = 0; i < arr.length; i++) {
         arr[i] = parseInt(arr[i], 10);
     }
     return arr;
