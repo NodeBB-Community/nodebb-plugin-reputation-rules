@@ -59,6 +59,10 @@ You can configure what "too old" means for you, for example 30 days, 90 days, or
 
 ### Changelog
 
+v1.2.2
+
+ - Big refactor mainly to use async/await instead of callbacks
+
 v1.2.1
 
  - Fix typos on "weigh"
