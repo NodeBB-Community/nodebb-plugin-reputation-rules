@@ -38,8 +38,7 @@ let ReputationParams = function (userId, postId) {
             params.author = await this.findAuthor();
             params.post.cid = parseInt(await this.findCategory(), 10);
             return params;
-        } catch (e) {
-            console.log('[nodebb-plugin-reputation-rules] Error retrieving vote data on ReputationParams. ' + err.message);
+        } catch (err) {
             throw new Error('[nodebb-plugin-reputation-rules] Error retrieving vote data on ReputationParams. ' + err.message);
         }
     };
