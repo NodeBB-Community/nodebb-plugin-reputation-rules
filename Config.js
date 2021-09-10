@@ -16,28 +16,28 @@ let MIN_POSTS_TO_UPVOTE = 20,
     MAX_POST_AGE_DAYS = 0; // 0 means disabled
 
 let Config = {
-    minPostToDownvote: function () {
+    minPostToDownvote() {
         return MIN_POSTS_TO_DOWNVOTE;
     },
-    minDaysToDownvote: function () {
+    minDaysToDownvote() {
         return MIN_DAYS_TO_DOWNVOTE;
     },
-    minReputationToDownvote: function () {
+    minReputationToDownvote() {
         return MIN_REPUTATION_TO_DOWNVOTE;
     },
-    minPostToUpvote: function () {
+    minPostToUpvote() {
         return MIN_POSTS_TO_UPVOTE;
     },
-    minDaysToUpvote: function () {
+    minDaysToUpvote() {
         return MIN_DAYS_TO_UPVOTE;
     },
-    maxVotesPerUserInThread: function () {
+    maxVotesPerUserInThread() {
         return MAX_VOTES_PER_USER_AND_THREAD;
     },
-    maxVotesToSameUserInMonth: function () {
+    maxVotesToSameUserInMonth() {
         return MAX_VOTES_TO_SAME_USER_PER_MONTH;
     },
-    maxVotesPerUser: function (reputation) {
+    maxVotesPerUser(reputation) {
         let MIN = 5,
             MAX = 50;
         let calculatedVotesPerUser = Math.floor(reputation / 10);
@@ -48,56 +48,56 @@ let Config = {
         }
         return calculatedVotesPerUser;
     },
-    maxDownvotesPerDay: function () {
+    maxDownvotesPerDay() {
         return MAX_DOWNVOTES_PER_DAY;
     },
-    upvoteExtraPercentage: function () {
+    upvoteExtraPercentage() {
         return UPVOTE_EXTRA_PERCENTAGE;
     },
-    downvoteExtraPercentage: function () {
+    downvoteExtraPercentage() {
         return DOWNVOTE_EXTRA_PERCENTAGE;
     },
-    downvotePenalization: function () {
+    downvotePenalization() {
         return DOWNVOTE_PENALIZATION;
     },
-    maxUpvoteWeight: function () {
+    maxUpvoteWeight() {
         return MAX_POINTS_FOR_UPVOTE;
     },
-    maxDownvoteWeight: function () {
+    maxDownvoteWeight() {
         return MAX_POINTS_FOR_DOWNVOTE;
     },
-    getMainLogId: function (voterId, authorId, topicId, postId) {
+    getMainLogId(voterId, authorId, topicId, postId) {
         return REP_LOG_NAMESPACE + ":"
             + voterId + ":"
             + authorId + ":"
             + topicId + ":"
             + postId;
     },
-    getPerThreadLogId: function (voterId, topicId) {
+    getPerThreadLogId(voterId, topicId) {
         return REP_LOG_NAMESPACE + ":user:" + voterId + ":thread:" + topicId;
     },
-    getPerAuthorLogId: function (voterId, authorId) {
+    getPerAuthorLogId(voterId, authorId) {
         let now = new Date();
         let month = (now.getMonth() + 1) + "-" + now.getFullYear();
         return REP_LOG_NAMESPACE + ":user:" + voterId + ":author:" + authorId + ":month:" + month;
     },
-    getPerUserLogId: function (voterId) {
+    getPerUserLogId(voterId) {
         let now = new Date();
         let today = now.getDate() + "-" + (now.getMonth() + 1) + "-" + now.getFullYear();
         return REP_LOG_NAMESPACE + ":user:" + voterId + ":day:" + today;
     },
-    getPerUserAndTypeLogId: function (voterId, voteType) {
+    getPerUserAndTypeLogId(voterId, voteType) {
         let now = new Date();
         let today = now.getDate() + "-" + (now.getMonth() + 1) + "-" + now.getFullYear();
         return REP_LOG_NAMESPACE + ":user:" + voterId + ":day:" + today + ':type:' + voteType;
     },
-    getDisabledCategories: function () {
+    getDisabledCategories() {
         return DISABLED_CATEGORIES_IDS;
     },
-    getMaxPostAgeDays: function() {
+    getMaxPostAgeDays() {
         return MAX_POST_AGE_DAYS;
     },
-    getSettings: function () {
+    getSettings() {
         let settings = {};
         settings.minPostsToUpvote = MIN_POSTS_TO_UPVOTE;
         settings.minDaysToUpvote = MIN_DAYS_TO_UPVOTE;
@@ -117,7 +117,7 @@ let Config = {
         settings.maxPostAgeDays = MAX_POST_AGE_DAYS;
         return settings;
     },
-    setSettings: function (settings) {
+    setSettings(settings) {
         MIN_POSTS_TO_UPVOTE = settings.minPostsToUpvote;
         MIN_DAYS_TO_UPVOTE = settings.minDaysToUpvote;
         MIN_POSTS_TO_DOWNVOTE = settings.minPostsToDownvote;

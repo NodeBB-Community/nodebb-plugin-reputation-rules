@@ -8,7 +8,7 @@ let languages, texts = null;
 loadTexts();
 
 let translator = {
-    translate: function (text, language, defaultLanguage) {
+    translate(text, language, defaultLanguage) {
         if (!languageSupported(language)) {
             language = defaultLanguage || 'en_GB';
         }

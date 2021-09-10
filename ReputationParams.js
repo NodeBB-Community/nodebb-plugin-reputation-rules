@@ -29,5 +29,5 @@ async function recoverParams(voterId, postId) {
 }
 
 module.exports = {
-    recoverParams: recoverParams
+    recoverParams
 };

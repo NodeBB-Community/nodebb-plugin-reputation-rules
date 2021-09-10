@@ -8,6 +8,8 @@
 
 ![Screenshot](https://raw.githubusercontent.com/exo-do/nodebb-plugin-reputation-rules/master/reputation-rules-acp.png)
 
+## Rules
+
 ### Rule #1
 **Upvoting** In order to upvote, the user must have  
  - `{MIN_POSTS_TO_UPVOTE}` posts or more
@@ -57,7 +59,7 @@ Optional: you can limit upvotes and downvotes to recent posts. In other words, i
 You can configure what "too old" means for you, for example 30 days, 90 days, or 0 if you want to disable this feature and allow votes in old posts.  
 **Note** unvotes are always allowed.
 
-### Changelog
+## Changelog
 
 v1.2.2
 
