@@ -1,6 +1,6 @@
 ![](https://packages.nodebb.org/api/v1/plugins/nodebb-plugin-reputation-rules/compatibility.png)
-[![npm version](https://badge.fury.io/js/nodebb-plugin-reputation-rules.svg?nocache=1)](https://badge.fury.io/js/nodebb-plugin-reputation-rules) 
-[![Code Climate](https://codeclimate.com/github/exo-do/nodebb-plugin-reputation-rules/badges/gpa.svg?nocache=1)](https://codeclimate.com/github/exo-do/nodebb-plugin-reputation-rules)
+[![npm version](https://badge.fury.io/js/nodebb-plugin-reputation-rules.svg?nocache=1)](https://badge.fury.io/js/nodebb-plugin-reputation-rules)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/f8c657b57e2d4664b91b9431b1138acb)](https://www.codacy.com/gh/exo-do/nodebb-plugin-reputation-rules/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=exo-do/nodebb-plugin-reputation-rules&amp;utm_campaign=Badge_Grade)
 
 # Reputation Rules Plugin for NodeBB
 
