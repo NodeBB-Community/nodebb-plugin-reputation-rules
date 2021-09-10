@@ -1,11 +1,9 @@
 'use strict';
 
 let UserVotingPermissions = function(Config, db, user, post) {
-    this.user = user;
-    this.post = post;
 
     this.hasEnoughPostsToUpvote = async function() {
-        let allowed = this.user.postcount >= Config.minPostToUpvote();
+        let allowed = user.postcount >= Config.minPostToUpvote();
         if (!allowed) throw {'reason': 'notEnoughPosts'};
     };
 
@@ -13,14 +11,14 @@ let UserVotingPermissions = function(Config, db, user, post) {
         let now = new Date();
         let xDaysAgo = now.getTime() - Config.minDaysToUpvote() * 24 * 60 * 60 * 1000;
 
-        let allowed = this.user.joindate < xDaysAgo;
+        let allowed = user.joindate < xDaysAgo;
         if (!allowed) throw {'reason': 'notOldEnough'};
     };
 
     this.hasVotedTooManyPostsInThread = async function() {
         let userVotesInThread;
         try {
-            userVotesInThread = await countVotesInThread(this.user.uid, this.post.tid);
+            userVotesInThread = await countVotesInThread(user.uid, post.tid);
         } catch (err) {
             err.reason = 'unknownError';
             throw err;
@@ -32,7 +30,7 @@ let UserVotingPermissions = function(Config, db, user, post) {
     this.hasVotedAuthorTooManyTimesThisMonth = async function() {
         let votesToAuthor;
         try {
-            votesToAuthor = await countVotesToAuthor(this.user.uid, this.post.uid);
+            votesToAuthor = await countVotesToAuthor(user.uid, post.uid);
         } catch (err) {
             err.reason = 'unknownError';
             throw err;
@@ -44,17 +42,17 @@ let UserVotingPermissions = function(Config, db, user, post) {
     this.hasVotedTooManyTimesToday = async function() {
         let votes;
         try {
-            votes = await countVotesForUser(this.user.uid);
+            votes = await countVotesForUser(user.uid);
         } catch (err) {
             err.reason = 'unknownError';
             throw err;
         }
-        let allowed = votes < Config.maxVotesPerUser(this.user.reputation);
+        let allowed = votes < Config.maxVotesPerUser(user.reputation);
         if (!allowed) throw {'reason': 'tooManyVotesToday'};
     };
 
     this.hasEnoughPostsToDownvote = async function() {
-        let allowed = this.user.postcount >= Config.minPostToDownvote();
+        let allowed = user.postcount >= Config.minPostToDownvote();
         if (!allowed) throw {'reason': 'notEnoughPosts'};
     };
 
@@ -62,18 +60,18 @@ let UserVotingPermissions = function(Config, db, user, post) {
         let now = new Date();
         let xDaysAgo = now.getTime() - Config.minDaysToDownvote() * 24 * 60 * 60 * 1000;
 
-        let allowed = this.user.joindate < xDaysAgo;
+        let allowed = user.joindate < xDaysAgo;
         if (!allowed) throw {'reason': 'notOldEnough'};
     };
 
     this.hasEnoughReputationToDownvote = async function() {
-        let allowed = this.user.reputation >= Config.minReputationToDownvote();
+        let allowed = user.reputation >= Config.minReputationToDownvote();
         if (!allowed) throw {'reason': 'notEnoughReputation'};
     };
 
     this.votingAllowedInCategory = async function() {
         let categoryBlackList = Config.getDisabledCategories();
-        let index = categoryBlackList.indexOf(this.post.cid);
+        let index = categoryBlackList.indexOf(post.cid);
         let allowed = index === -1;
         if (!allowed) throw {'reason': 'votingDisabledInCategory'};
     };
@@ -82,7 +80,7 @@ let UserVotingPermissions = function(Config, db, user, post) {
         if (Config.getMaxPostAgeDays() === 0) return;
 
         let now = new Date();
-        let postAgeDays = (now - this.post.timestamp)/24/60/60/1000;
+        let postAgeDays = (now - post.timestamp)/24/60/60/1000;
         if (postAgeDays > Config.getMaxPostAgeDays()) throw {'reason': 'postTooOld'};
     };
 
@@ -91,7 +89,7 @@ let UserVotingPermissions = function(Config, db, user, post) {
 
         let downvotes;
         try {
-            downvotes = await countDownvotesForUser(this.user.uid);
+            downvotes = await countDownvotesForUser(user.uid);
         } catch (err) {
             err.reason = 'unknownError';
             throw err;
