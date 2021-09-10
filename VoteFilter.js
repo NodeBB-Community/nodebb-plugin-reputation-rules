@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 const winston = require.main.require('winston'),
     ReputationParams = require('./ReputationParams'),

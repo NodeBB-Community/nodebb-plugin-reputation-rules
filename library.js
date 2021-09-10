@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 let plugin = {'settingsVersion': '1.1.3'},
     db = require.main.require('./src/database'),

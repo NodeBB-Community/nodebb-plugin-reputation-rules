@@ -1,6 +1,6 @@
 'use strict';
 
-const fs = require("fs");
+const fs = require.main.require("fs");
 
 const LANGUAGE_DIR = __dirname + '/public/languages/';
 
@@ -42,7 +42,7 @@ function loadLanguageTexts(language) {
 }
 
 function languageSupported(language) {
-    return languages.indexOf(language) != -1;
+    return languages.indexOf(language) !== -1;
 }
 
 module.exports = translator;
