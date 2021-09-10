@@ -57,6 +57,9 @@ let VoteFilter = function(ReputationManager, users) {
     };
 
     this.translateError = async function(err, data) {
+        if (err.reason === 'unknownError') {
+            winston.error(err.message);
+        }
         let settings = await users.getSettings(data.user.uid);
         return translator.translate(err.reason, settings.userLang);
     }
