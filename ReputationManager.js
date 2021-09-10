@@ -102,7 +102,7 @@ let ReputationManager = function (Config) {
 
     this.findVoteLog = async function (user, author, post) {
         let voteIdentifier = Config.getMainLogId(user.uid, author.uid, post.tid, post.pid);
-        return db.getObject(voteIdentifier);
+        return await db.getObject(voteIdentifier);
     };
 
     async function saveMainVoteLog(vote) {
