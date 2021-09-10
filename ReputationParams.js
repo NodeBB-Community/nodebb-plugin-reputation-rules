@@ -4,31 +4,30 @@ const User = require.main.require('./src/user'),
      Posts = require.main.require('./src/posts');
 
 let ReputationParams = function (userId, postId) {
-    let _this = this;
     this.userId = userId;
     this.postId = postId;
     this.authorId = null;
 
     this.findUser = async function () {
-        return await User.getUserData(_this.userId);
+        return await User.getUserData(this.userId);
     };
 
     this.findPost = async function () {
-        let post = await Posts.getPostData(_this.postId);
-        _this.authorId = post.uid;
+        let post = await Posts.getPostData(this.postId);
+        this.authorId = post.uid;
         return post;
     };
 
     this.findAuthor = async function () {
-        if (!_this.authorId) {
-            throw new Error('findAuthor() error: post.uid missing for postId: ' + _this.postId);
+        if (!this.authorId) {
+            throw new Error('findAuthor() error: post.uid missing for postId: ' + this.postId);
         }
 
-        return await User.getUserData(_this.authorId);
+        return await User.getUserData(this.authorId);
     };
 
     this.findCategory = async function () {
-        return await Posts.getCidByPid(_this.postId);
+        return await Posts.getCidByPid(this.postId);
     };
 
     this.recoverParams = async function () {
