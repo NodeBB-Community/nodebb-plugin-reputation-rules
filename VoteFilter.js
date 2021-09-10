@@ -1,7 +1,7 @@
 'use strict';
 
 const winston = require.main.require('winston'),
-    ReputationParams = require('./ReputationParams'),
+    reputationParams = require('./ReputationParams'),
     translator = require('./translator');
 
 function getVoteFromCommand(command) {
@@ -14,8 +14,7 @@ function getVoteFromCommand(command) {
 
 async function buildParams(command) {
     let vote = getVoteFromCommand(command);
-    let reputationParams = new ReputationParams(vote.uid, vote.pid);
-    return await reputationParams.recoverParams();
+    return await reputationParams.recoverParams(vote.uid, vote.pid);
 }
 
 let VoteFilter = function(ReputationManager, users) {

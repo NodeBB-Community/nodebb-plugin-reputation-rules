@@ -7,7 +7,7 @@ let plugin = {'settingsVersion': '1.1.3'},
     SocketAdmin = require.main.require('./src/socket.io/admin'),
     winston = require.main.require('winston'),
 
-    ReputationParams = require('./ReputationParams'),
+    reputationParams = require('./ReputationParams'),
     VoteLog = require('./VoteLog'),
     Config = require('./Config.js'),
 
@@ -65,10 +65,8 @@ plugin.filterUnvote = async function (command) {
 plugin.upvote = async function (vote) {
     winston.verbose('[plugin-reputation-rules][hook:upvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
-    let reputationParams = new ReputationParams(vote.uid, vote.pid);
-
     try {
-        let data = await reputationParams.recoverParams();
+        let data = await reputationParams.recoverParams(vote.uid, vote.pid);
         // undo downvote (if needed)
         if (vote.current === 'downvote') {
             await undoDownvote(data.user, data.author, data.post);
@@ -91,10 +89,8 @@ plugin.upvote = async function (vote) {
 plugin.downvote = async function (vote) {
     winston.verbose('[plugin-reputation-rules][hook:downvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
-    let reputationParams = new ReputationParams(vote.uid, vote.pid);
-
     try {
-        let data = await reputationParams.recoverParams();
+        let data = await reputationParams.recoverParams(vote.uid, vote.pid);
         // undo upvote (if needed)
         if (vote.current === 'upvote') {
             await undoUpvote(data.user, data.author, data.post);
@@ -118,10 +114,8 @@ plugin.downvote = async function (vote) {
 plugin.unvote = async function (vote) {
     winston.verbose('[plugin-reputation-rules][hook:unvote] user id: ' + vote.uid + ', post id: ' + vote.pid + ', current: ' + vote.current);
 
-    let reputationParams = new ReputationParams(vote.uid, vote.pid);
-
     try {
-        let data = await reputationParams.recoverParams();
+        let data = await reputationParams.recoverParams(vote.uid, vote.pid);
 
         if (vote.current === 'downvote') {
             await undoDownvote(data.user, data.author, data.post);
