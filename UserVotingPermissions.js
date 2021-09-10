@@ -1,159 +1,125 @@
 'use strict';
 
-var UserVotingPermissions = function(Config, db, user, post) {
-    var _this = this;
-    this.user = user;
-    this.post = post;
+let UserVotingPermissions = function(Config, db, user, post) {
 
-    this.hasEnoughPostsToUpvote = function(callback) {
-        var allowed = _this.user.postcount >= Config.minPostToUpvote();
-        if (!allowed) callback({'reason': 'notEnoughPosts'});
-        else callback();
+    this.hasEnoughPostsToUpvote = async function() {
+        let allowed = user.postcount >= Config.minPostToUpvote();
+        if (!allowed) throw {'reason': 'notEnoughPosts'};
     };
 
-    this.isOldEnoughToUpvote = function(callback) {
-        var now = new Date();
-        var xDaysAgo = now.getTime() - Config.minDaysToUpvote() * 24 * 60 * 60 * 1000;
+    this.isOldEnoughToUpvote = async function() {
+        let now = new Date();
+        let xDaysAgo = now.getTime() - Config.minDaysToUpvote() * 24 * 60 * 60 * 1000;
 
-        var allowed = _this.user.joindate < xDaysAgo;
-        if (!allowed) callback({'reason': 'notOldEnough'});
-        else callback();
+        let allowed = user.joindate < xDaysAgo;
+        if (!allowed) throw {'reason': 'notOldEnough'};
     };
 
-    this.hasVotedTooManyPostsInThread = function(callback) {
-        countVotesInThread(_this.user.uid, _this.post.tid, function (err, userVotesInThread) {
-            if (err) {
-                err.reason = 'Unknown';
-                callback(err);
-            }
-
-            var allowed = userVotesInThread < Config.maxVotesPerUserInThread();
-            if (!allowed) callback({'reason': 'tooManyVotesInThread'});
-            else callback();
-        });
+    this.hasVotedTooManyPostsInThread = async function() {
+        let userVotesInThread;
+        try {
+            userVotesInThread = await countVotesInThread(user.uid, post.tid);
+        } catch (err) {
+            err.reason = 'unknownError';
+            throw err;
+        }
+        let allowed = userVotesInThread < Config.maxVotesPerUserInThread();
+        if (!allowed) throw {'reason': 'tooManyVotesInThread'};
     };
 
-    this.hasVotedAuthorTooManyTimesThisMonth = function(callback) {
-        countVotesToAuthor(_this.user.uid, _this.post.uid, function (err, votesToAuthor) {
-            if (err) {
-                err.reason = 'Unknown';
-                callback(err);
-            }
-
-            var allowed = votesToAuthor < Config.maxVotesToSameUserInMonth();
-            if (!allowed) callback({'reason': 'tooManyVotesToSameUserThisMonth'});
-            else callback();
-        });
+    this.hasVotedAuthorTooManyTimesThisMonth = async function() {
+        let votesToAuthor;
+        try {
+            votesToAuthor = await countVotesToAuthor(user.uid, post.uid);
+        } catch (err) {
+            err.reason = 'unknownError';
+            throw err;
+        }
+        let allowed = votesToAuthor < Config.maxVotesToSameUserInMonth();
+        if (!allowed) throw {'reason': 'tooManyVotesToSameUserThisMonth'};
     };
 
-    this.hasVotedTooManyTimesToday = function(callback) {
-        countVotesForUser(_this.user.uid, function (err, votes) {
-            if (err) {
-                err.reason = 'Unknown';
-                callback(err);
-            }
-
-            var allowed = votes < Config.maxVotesPerUser(_this.user.reputation);
-            if (!allowed) callback({'reason': 'tooManyVotesToday'});
-            else callback();
-        });
+    this.hasVotedTooManyTimesToday = async function() {
+        let votes;
+        try {
+            votes = await countVotesForUser(user.uid);
+        } catch (err) {
+            err.reason = 'unknownError';
+            throw err;
+        }
+        let allowed = votes < Config.maxVotesPerUser(user.reputation);
+        if (!allowed) throw {'reason': 'tooManyVotesToday'};
     };
 
-    this.hasEnoughPostsToDownvote = function(callback) {
-        var allowed = _this.user.postcount >= Config.minPostToDownvote();
-        if (!allowed) callback({'reason': 'notEnoughPosts'});
-        else callback();
+    this.hasEnoughPostsToDownvote = async function() {
+        let allowed = user.postcount >= Config.minPostToDownvote();
+        if (!allowed) throw {'reason': 'notEnoughPosts'};
     };
 
-    this.isOldEnoughToDownvote = function(callback) {
-        var now = new Date();
-        var xDaysAgo = now.getTime() - Config.minDaysToDownvote() * 24 * 60 * 60 * 1000;
+    this.isOldEnoughToDownvote = async function() {
+        let now = new Date();
+        let xDaysAgo = now.getTime() - Config.minDaysToDownvote() * 24 * 60 * 60 * 1000;
 
-        var allowed = _this.user.joindate < xDaysAgo;
-        if (!allowed) callback({'reason': 'notOldEnough'});
-        else callback();
+        let allowed = user.joindate < xDaysAgo;
+        if (!allowed) throw {'reason': 'notOldEnough'};
     };
 
-    this.hasEnoughReputationToDownvote = function(callback) {
-        var allowed = _this.user.reputation >= Config.minReputationToDownvote();
-        if (!allowed) callback({'reason': 'notEnoughReputation'});
-        else callback();
+    this.hasEnoughReputationToDownvote = async function() {
+        let allowed = user.reputation >= Config.minReputationToDownvote();
+        if (!allowed) throw {'reason': 'notEnoughReputation'};
     };
 
-    this.votingAllowedInCategory = function(callback) {
-        var categoryBlackList = Config.getDisabledCategories();
-        var index = categoryBlackList.indexOf(_this.post.cid);
-        var allowed = index === -1;
-        if (!allowed) callback({'reason': 'votingDisabledInCategory'});
-        else callback();
+    this.votingAllowedInCategory = async function() {
+        let categoryBlackList = Config.getDisabledCategories();
+        let index = categoryBlackList.indexOf(post.cid);
+        let allowed = index === -1;
+        if (!allowed) throw {'reason': 'votingDisabledInCategory'};
     };
 
-    this.postIsNotTooOld = function(callback) {
-        if (Config.getMaxPostAgeDays() === 0) return callback();
+    this.postIsNotTooOld = async function() {
+        if (Config.getMaxPostAgeDays() === 0) return;
 
-        var now = new Date();
-        var postAgeDays = (now - _this.post.timestamp)/24/60/60/1000;
-        if (postAgeDays > Config.getMaxPostAgeDays()) callback({'reason': 'postTooOld'});
-        else callback();
+        let now = new Date();
+        let postAgeDays = (now - post.timestamp)/24/60/60/1000;
+        if (postAgeDays > Config.getMaxPostAgeDays()) throw {'reason': 'postTooOld'};
     };
 
-    this.hasDownvotedTooManyTimesToday = function(callback) {
-        if (Config.maxDownvotesPerDay() === 0) return callback();
+    this.hasDownvotedTooManyTimesToday = async function() {
+        if (Config.maxDownvotesPerDay() === 0) return;
 
-        countDownvotesForUser(_this.user.uid, function(err, downvotes) {
-            if (err) {
-                err.reason = 'Unknown';
-                callback(err);
-            }
-
-            var allowed = downvotes < Config.maxDownvotesPerDay();
-            if (!allowed) callback({'reason': 'tooManyDownvotesToday'});
-            else callback();
-        });
+        let downvotes;
+        try {
+            downvotes = await countDownvotesForUser(user.uid);
+        } catch (err) {
+            err.reason = 'unknownError';
+            throw err;
+        }
+        let allowed = downvotes < Config.maxDownvotesPerDay();
+        if (!allowed) throw {'reason': 'tooManyDownvotesToday'};
     };
 
-    function countVotesInThread(userId, threadId, callback) {
-        var voteIdentifier = Config.getPerThreadLogId(userId, threadId);
-        db.getSetMembers(voteIdentifier, function (err, setMembers) {
-            if (err) {
-                callback(err);
-                return;
-            }
-            callback(null, setMembers.length);
-        });
+    async function countVotesInThread(userId, threadId) {
+        let voteIdentifier = Config.getPerThreadLogId(userId, threadId);
+        let setMembers = await db.getSetMembers(voteIdentifier);
+        return setMembers.length;
     }
 
-    function countVotesToAuthor(userId, authorId, callback) {
-        var voteIdentifier = Config.getPerAuthorLogId(userId, authorId);
-        db.getSetMembers(voteIdentifier, function (err, setMembers) {
-            if (err) {
-                callback(err);
-                return;
-            }
-            callback(null, setMembers.length);
-        });
+    async function countVotesToAuthor(userId, authorId) {
+        let voteIdentifier = Config.getPerAuthorLogId(userId, authorId);
+        let setMembers = await db.getSetMembers(voteIdentifier);
+        return setMembers.length;
     }
 
-    function countVotesForUser(userId, callback) {
-        var voteIdentifier = Config.getPerUserLogId(userId);
-        db.getSetMembers(voteIdentifier, function (err, setMembers) {
-            if (err) {
-                callback(err);
-                return;
-            }
-            callback(null, setMembers.length);
-        });
+    async function countVotesForUser(userId) {
+        let voteIdentifier = Config.getPerUserLogId(userId);
+        let setMembers = await db.getSetMembers(voteIdentifier);
+        return setMembers.length;
     }
 
-    function countDownvotesForUser(userId, callback) {
-        var voteIdentifier = Config.getPerUserAndTypeLogId(userId, 'downvote');
-        db.getSetMembers(voteIdentifier, function (err, setMembers) {
-            if (err) {
-                callback(err);
-                return;
-            }
-            callback(null, setMembers.length);
-        });
+    async function countDownvotesForUser(userId) {
+        let voteIdentifier = Config.getPerUserAndTypeLogId(userId, 'downvote');
+        let setMembers = await db.getSetMembers(voteIdentifier);
+        return setMembers.length;
     }
 };
 

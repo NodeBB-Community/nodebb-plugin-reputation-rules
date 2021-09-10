@@ -10,17 +10,17 @@
 
 ### Rule #1
 **Upvoting** In order to upvote, the user must have  
- - {MIN_POSTS_TO_UPVOTE} posts or more
- - at least {MIN_DAYS_TO_UPVOTE} days since registration
+ - `{MIN_POSTS_TO_UPVOTE}` posts or more
+ - at least `{MIN_DAYS_TO_UPVOTE}` days since registration
 
 ### Rule #2
 **Downvoting** In order to downvote, the user must have  
- - {MIN_POSTS_TO_DOWNVOTE} posts or more
- - at least {MIN_DAYS_TO_DOWNVOTE} since registration
- - {MIN_REPUTATION_TO_DOWNVOTE} reputation or more
+ - `{MIN_POSTS_TO_DOWNVOTE}` posts or more
+ - at least `{MIN_DAYS_TO_DOWNVOTE}` since registration
+ - `{MIN_REPUTATION_TO_DOWNVOTE}` reputation or more
 
 ### Rule #3
-Downvoting costs {DOWNVOTE_PENALIZATION} reputation (user who votes loses some reputation)
+Downvoting costs `{DOWNVOTE_PENALIZATION}` reputation (user who votes loses some reputation)
 
 ### Rule #4
 One user can't vote (up or down) more than `X` times a day, being `X = reputation/10`. With a minimum of 5 and a max of 50

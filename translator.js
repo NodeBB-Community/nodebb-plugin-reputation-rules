@@ -1,19 +1,23 @@
 'use strict';
 
-var fs = require("fs");
+const fs = require.main.require("fs");
 
-var LANGUAGE_DIR = __dirname + '/public/languages/';
+const LANGUAGE_DIR = __dirname + '/public/languages/';
 
-var languages, texts = null;
+let languages, texts = null;
 loadTexts();
 
-var translator = {
+let translator = {
     translate: function (text, language, defaultLanguage) {
         if (!languageSupported(language)) {
             language = defaultLanguage || 'en_GB';
         }
 
-        return texts[language][text];
+        if (texts[language][text]) {
+            return texts[language][text];
+        } else {
+            return text;
+        }
     }
 };
 
@@ -27,10 +31,10 @@ function loadTexts() {
 }
 
 function loadLanguageTexts(language) {
-    var allPhrases = {};
+    let allPhrases = {};
     fs.readdirSync(LANGUAGE_DIR + language).forEach(function (phrasesFile) {
-        var phrases = require(LANGUAGE_DIR + language + '/' + phrasesFile);
-        for (var phraseKey in phrases) {
+        let phrases = require(LANGUAGE_DIR + language + '/' + phrasesFile);
+        for (let phraseKey in phrases) {
             allPhrases[phraseKey] = phrases[phraseKey];
         }
     });
@@ -38,7 +42,7 @@ function loadLanguageTexts(language) {
 }
 
 function languageSupported(language) {
-    return languages.indexOf(language) != -1;
+    return languages.indexOf(language) !== -1;
 }
 
 module.exports = translator;

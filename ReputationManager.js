@@ -1,70 +1,60 @@
 'use strict';
 
-var db = require.main.require('./src/database'),
+const db = require.main.require('./src/database'),
     winston = require.main.require('winston'),
-    async = require('async'),
     UserVotingPermissions = require('./UserVotingPermissions.js');
 
-var ReputationManager = function (Config) {
-    this.userCanUpvotePost = function (user, post, callback) {
-        var userPermissions = new UserVotingPermissions(Config, db, user, post);
+let ReputationManager = function (Config) {
 
-        async.series([
-                userPermissions.votingAllowedInCategory,
-                userPermissions.hasEnoughPostsToUpvote,
-                userPermissions.isOldEnoughToUpvote,
-                userPermissions.hasVotedTooManyPostsInThread,
-                userPermissions.hasVotedAuthorTooManyTimesThisMonth,
-                userPermissions.hasVotedTooManyTimesToday,
-                userPermissions.postIsNotTooOld
-            ],
-            function (err) {
-                if (err) {
-                    callback({
-                        'allowed': false,
-                        'reason': err.reason
-                    });
-                    return;
-                }
+    this.userCanUpvotePost = async function (user, post) {
+        let userPermissions = new UserVotingPermissions(Config, db, user, post);
 
-                callback({
-                    'allowed': true
-                });
-            });
+        try {
+            await userPermissions.votingAllowedInCategory();
+            await userPermissions.hasEnoughPostsToUpvote();
+            await userPermissions.isOldEnoughToUpvote();
+            await userPermissions.hasVotedTooManyPostsInThread();
+            await userPermissions.hasVotedAuthorTooManyTimesThisMonth();
+            await userPermissions.hasVotedTooManyTimesToday();
+            await userPermissions.postIsNotTooOld();
+            return {
+                'allowed': true
+            };
+        } catch (err) {
+            throw {
+                'allowed': false,
+                'reason': err.reason
+            };
+        }
     };
 
-    this.userCanDownvotePost = function (user, post, callback) {
-        var userPermissions = new UserVotingPermissions(Config, db, user, post);
+    this.userCanDownvotePost = async function (user, post) {
+        let userPermissions = new UserVotingPermissions(Config, db, user, post);
 
-        async.series([
-                userPermissions.votingAllowedInCategory,
-                userPermissions.hasDownvotedTooManyTimesToday,
-                userPermissions.hasEnoughPostsToDownvote,
-                userPermissions.isOldEnoughToDownvote,
-                userPermissions.hasEnoughReputationToDownvote,
-                userPermissions.hasVotedTooManyPostsInThread,
-                userPermissions.hasVotedAuthorTooManyTimesThisMonth,
-                userPermissions.hasVotedTooManyTimesToday,
-                userPermissions.postIsNotTooOld
-            ],
-            function (err) {
-                if (err) {
-                    callback({
-                        'allowed': false,
-                        'reason': err.reason
-                    });
-                    return;
-                }
-
-                callback({
-                    'allowed': true
-                });
-            });
+        try {
+            await userPermissions.votingAllowedInCategory();
+            await userPermissions.hasDownvotedTooManyTimesToday();
+            await userPermissions.hasEnoughPostsToDownvote();
+            await userPermissions.isOldEnoughToDownvote();
+            await userPermissions.hasEnoughReputationToDownvote();
+            await userPermissions.hasVotedTooManyPostsInThread();
+            await userPermissions.hasVotedAuthorTooManyTimesThisMonth();
+            await userPermissions.hasVotedTooManyTimesToday();
+            await userPermissions.postIsNotTooOld();
+            return {
+                'allowed': true
+            };
+        } catch (err) {
+            throw {
+                'allowed': false,
+                'reason': err.reason
+            };
+        }
     };
 
     this.calculateUpvoteWeight = function (user) {
-        var extraRate = Config.upvoteExtraPercentage() / 100;
-        var weight = Math.floor(user.reputation * extraRate);
+        let extraRate = Config.upvoteExtraPercentage() / 100;
+        let weight = Math.floor(user.reputation * extraRate);
         if (weight < 0) weight = 0;
         if (weight > Config.maxUpvoteWeight()) {
             weight = Config.maxUpvoteWeight();
@@ -74,8 +64,8 @@ var ReputationManager = function (Config) {
     };
 
     this.calculateDownvoteWeight = function (user) {
-        var extraRate = Config.downvoteExtraPercentage() / 100;
-        var weight = Math.floor(user.reputation * extraRate);
+        let extraRate = Config.downvoteExtraPercentage() / 100;
+        let weight = Math.floor(user.reputation * extraRate);
         if (weight < 0) weight = 0;
         if (weight > Config.maxDownvoteWeight()) {
             weight = Config.maxDownvoteWeight();
@@ -84,159 +74,97 @@ var ReputationManager = function (Config) {
         return weight;
     };
 
-    this.logVote = function (vote, callback) {
+    this.logVote = async function (vote) {
         vote.undone = false;
         winston.verbose('[plugin-reputation-rules][logVote] type: ' + vote.type + ', voterId: ' + vote.voterId+ ', authorId: ' + vote.authorId + ', extra amount: ' + vote.amount);
 
         //save main object and its key in secondary sets
-        async.series([
-                saveMainVoteLog.bind(null, vote),
-                saveThreadVoteLog.bind(null, vote),
-                saveAuthorVoteLog.bind(null, vote),
-                saveUserVoteLog.bind(null, vote)
-            ],
-            function (err) {
-                if (err) {
-                    callback(err);
-                    return;
-                }
-                callback(null, vote);
-            });
+        await saveMainVoteLog(vote);
+        await saveThreadVoteLog(vote);
+        await saveAuthorVoteLog(vote);
+        await saveUserVoteLog(vote);
+
+        return vote;
     };
 
-    this.logVoteUndone = function (vote, callback) {
+    this.logVoteUndone = async function (vote) {
         vote.undone = true;
         winston.verbose('[logVoteUndone] voterId: ' + vote.voterId+ ', authorId: ' + vote.authorId);
 
         //update main object and remove its key from secondary sets
-        async.series([
-                updateMainVoteLog.bind(null, vote, 'undone', true),
-                removeThreadVoteLog.bind(null, vote),
-                removeAuthorVoteLog.bind(null, vote),
-                removeUserVoteLog.bind(null, vote)
-            ],
-            function (err) {
-                if (err) {
-                    callback(err);
-                    return;
-                }
-                callback(null, vote);
-            });
+        await updateMainVoteLog(vote, 'undone', true);
+        await removeThreadVoteLog(vote);
+        await removeAuthorVoteLog(vote);
+        await removeUserVoteLog(vote);
+
+        return vote;
     };
 
-    this.findVoteLog = function (user, author, post, callback) {
-        var voteIdentifier = Config.getMainLogId(user.uid, author.uid, post.tid, post.pid);
-        db.getObject(voteIdentifier, function (err, vote) {
-            if (err) {
-                callback(err);
-                return;
-            }
-            callback(null, vote);
-        });
+    this.findVoteLog = async function (user, author, post) {
+        let voteIdentifier = Config.getMainLogId(user.uid, author.uid, post.tid, post.pid);
+        return await db.getObject(voteIdentifier);
     };
 
-    function saveMainVoteLog(vote, callback) {
-        var key = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
-        db.setObject(key, vote, function (err) {
-            if (err) {
-                callback(err);
-                return;
-            }
-            callback(null, vote);
-        });
+    async function saveMainVoteLog(vote) {
+        let key = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
+        await db.setObject(key, vote);
     }
 
-    function updateMainVoteLog(vote, field, value, callback) {
-        var key = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
-        db.setObjectField(key, field, value, function (err) {
-            if (err) {
-                callback(err);
-                return;
-            }
-            callback(null);
-        });
+    async function updateMainVoteLog(vote, field, value) {
+        let key = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
+        await db.setObjectField(key, field, value);
     }
 
-    function saveThreadVoteLog(vote, callback) {
-        var key = Config.getPerThreadLogId(vote.voterId, vote.topicId);
-        var value = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
-        setAdd(key, value, callback);
+    async function saveThreadVoteLog(vote) {
+        let key = Config.getPerThreadLogId(vote.voterId, vote.topicId);
+        let value = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
+        await setAdd(key, value);
     }
 
-    function saveAuthorVoteLog(vote, callback) {
-        var key = Config.getPerAuthorLogId(vote.voterId, vote.authorId);
-        var value = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
-        setAdd(key, value, callback);
+    async function saveAuthorVoteLog(vote) {
+        let key = Config.getPerAuthorLogId(vote.voterId, vote.authorId);
+        let value = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
+        await setAdd(key, value);
     }
 
-    function saveUserVoteLog(vote, callback) {
-        var userKey = Config.getPerUserLogId(vote.voterId);
-        var userAndVoteTypeKey = Config.getPerUserAndTypeLogId(vote.voterId, vote.type);
-        var value = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
+    async function saveUserVoteLog(vote) {
+        let userKey = Config.getPerUserLogId(vote.voterId);
+        let userAndVoteTypeKey = Config.getPerUserAndTypeLogId(vote.voterId, vote.type);
+        let value = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
 
-        async.series([
-                setAdd.bind(null, userKey, value),
-                setAdd.bind(null, userAndVoteTypeKey, value)
-            ],
-            function (err) {
-                if (err) {
-                    callback(err);
-                    return;
-                }
-                callback(null, vote);
-            });
+        await setAdd(userKey, value);
+        await setAdd(userAndVoteTypeKey, value);
     }
 
-    function removeThreadVoteLog(vote, callback) {
-        var key = Config.getPerThreadLogId(vote.voterId, vote.topicId);
-        var value = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
-        setRemove(key, value, callback);
+    async function removeThreadVoteLog(vote) {
+        let key = Config.getPerThreadLogId(vote.voterId, vote.topicId);
+        let value = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
+        await setRemove(key, value);
     }
 
-    function removeAuthorVoteLog(vote, callback) {
-        var key = Config.getPerAuthorLogId(vote.voterId, vote.authorId);
-        var value = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
-        setRemove(key, value, callback);
+    async function removeAuthorVoteLog(vote) {
+        let key = Config.getPerAuthorLogId(vote.voterId, vote.authorId);
+        let value = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
+        await setRemove(key, value);
     }
 
-    function removeUserVoteLog(vote, callback) {
-        var userKey = Config.getPerUserLogId(vote.voterId);
-        var userUpvoteKey = Config.getPerUserAndTypeLogId(vote.voterId, 'upvote');
-        var userDownvoteKey = Config.getPerUserAndTypeLogId(vote.voterId, 'downvote');
-        var value = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
+    async function removeUserVoteLog(vote) {
+        let userKey = Config.getPerUserLogId(vote.voterId);
+        let userUpvoteKey = Config.getPerUserAndTypeLogId(vote.voterId, 'upvote');
+        let userDownvoteKey = Config.getPerUserAndTypeLogId(vote.voterId, 'downvote');
+        let value = Config.getMainLogId(vote.voterId, vote.authorId, vote.topicId, vote.postId);
 
-        async.series([
-                setRemove.bind(null, userKey, value),
-                setRemove.bind(null, userUpvoteKey, value),
-                setRemove.bind(null, userDownvoteKey, value)
-            ],
-            function (err) {
-                if (err) {
-                    callback(err);
-                    return;
-                }
-                callback(null, vote);
-            });
+        await setRemove(userKey, value);
+        await setRemove(userUpvoteKey, value);
+        await setRemove(userDownvoteKey, value);
     }
 
-    function setAdd(key, value, callback) {
-        db.setAdd(key, value, function (err) {
-            if (err) {
-                callback(err);
-                return;
-            }
-            callback(null, value);
-        });
+    async function setAdd(key, value) {
+        await db.setAdd(key, value);
     }
 
-    function setRemove(key, value, callback) {
-        db.setRemove(key, value, function (err) {
-            if (err) {
-                callback(err);
-                return;
-            }
-            callback(null);
-        });
+    async function setRemove(key, value) {
+        await db.setRemove(key, value);
     }
 };
 

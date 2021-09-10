@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 module.exports = function(voteParams, extraPoints, type) {
     if (type !== 'upvote' && type !== 'downvote') throw new Error('Vote type unknown: ' + type);

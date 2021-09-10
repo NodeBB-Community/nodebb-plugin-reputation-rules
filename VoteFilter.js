@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-var winston = require.main.require('winston'),
-    ReputationParams = require('./ReputationParams'),
+const winston = require.main.require('winston'),
+    reputationParams = require('./ReputationParams'),
     translator = require('./translator');
 
 function getVoteFromCommand(command) {
@@ -12,67 +12,57 @@ function getVoteFromCommand(command) {
     };
 }
 
-var VoteFilter = function(ReputationManager, users) {
-    this.filterUpvote = function (command, callback) {
-        var vote = getVoteFromCommand(command);
-        //winston.info('filter.post.upvote - user id: ' + vote.uid + ', post id: ' + vote.pid);
+async function buildParams(command) {
+    let vote = getVoteFromCommand(command);
+    return await reputationParams.recoverParams(vote.uid, vote.pid);
+}
 
-        var reputationParams = new ReputationParams(vote.uid, vote.pid);
-        reputationParams.recoverParams(function (err, data) {
-            if (err) {
-                winston.error('[nodebb-reputation-rules] Error on upvote filter hook');
-                var translated = translator.translate('unknownError', 'en_GB');
-                callback(new Error(translated));
-                return;
+let VoteFilter = function(ReputationManager, users) {
+
+    this.filterUpvote = async function (command) {
+        let data = await buildParams(command);
+        try {
+            await ReputationManager.userCanUpvotePost(data.user, data.post);
+            return command;
+        } catch (err) {
+            if (err.reason) {
+                throw new Error(await this.translateError(err, data));
             }
 
-            ReputationManager.userCanUpvotePost(data.user, data.post, function (result) {
-                if (!result.allowed) {
-                    //winston.info('[nodebb-reputation-rules] upvote not allowed');
-                    users.getSettings(data.user.uid, function (err, settings) {
-                        var translated = translator.translate(result.reason, settings.userLang);
-                        callback(new Error(translated));
-                    });
-                } else {
-                    callback(null, command);
-                }
-            });
-        });
+            winston.error('[nodebb-plugin-reputation-rules] Error on upvote filter hook');
+            winston.error(err);
+            throw err;
+        }
     };
 
-    this.filterDownvote = function (command, callback) {
-        var vote = getVoteFromCommand(command);
-        //winston.info('filter.post.downvote - user id: ' + vote.uid + ', post id: ' + vote.pid);
-
-        var reputationParams = new ReputationParams(vote.uid, vote.pid);
-        reputationParams.recoverParams(function (err, data) {
-            if (err) {
-                winston.error('[nodebb-reputation-rules] Error on downvote filter hook');
-                var translated = translator.translate('unknownError', 'en_GB');
-                callback(new Error(translated));
-                return;
+    this.filterDownvote = async function (command) {
+        let data = await buildParams(command);
+        try {
+            await ReputationManager.userCanDownvotePost(data.user, data.post);
+            return command;
+        } catch (err) {
+            if (err.reason) {
+                throw new Error(await this.translateError(err, data));
             }
 
-            ReputationManager.userCanDownvotePost(data.user, data.post, function (result) {
-                if (!result.allowed) {
-                    //winston.info('[nodebb-reputation-rules] downvote not allowed');
-                    users.getSettings(data.user.uid, function (err, settings) {
-                        var translated = translator.translate(result.reason, settings.userLang);
-                        callback(new Error(translated));
-                    });
-                } else {
-                    callback(null, command);
-                }
-            });
-        });
+            winston.error('[nodebb-plugin-reputation-rules] Error on downvote filter hook');
+            winston.error(err);
+            throw err;
+        }
     };
 
-    this.filterUnvote = function (command, callback) {
-        //unvote is always allowed, isn't it?
-        //winston.info('filter.post.unvote');
-
-        callback(null, command);
+    this.filterUnvote = async function (command) {
+        // unvote is always allowed
+        return command;
     };
+
+    this.translateError = async function(err, data) {
+        if (err.reason === 'unknownError') {
+            winston.error(err.message);
+        }
+        let settings = await users.getSettings(data.user.uid);
+        return translator.translate(err.reason, settings.userLang);
+    }
 };
 
 module.exports = VoteFilter;
