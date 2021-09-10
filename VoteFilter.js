@@ -12,58 +12,55 @@ function getVoteFromCommand(command) {
     };
 }
 
+async function buildParams(command) {
+    let vote = getVoteFromCommand(command);
+    let reputationParams = new ReputationParams(vote.uid, vote.pid);
+    return await reputationParams.recoverParams();
+}
+
 let VoteFilter = function(ReputationManager, users) {
 
     this.filterUpvote = async function (command) {
-        let vote = getVoteFromCommand(command);
-        //winston.info('filter.post.upvote - user id: ' + vote.uid + ', post id: ' + vote.pid);
-
-        let reputationParams = new ReputationParams(vote.uid, vote.pid);
-        let data = await reputationParams.recoverParams();
+        let data = await buildParams(command);
         try {
             await ReputationManager.userCanUpvotePost(data.user, data.post);
             return command;
         } catch (err) {
-            let settings = await users.getSettings(data.user.uid);
             if (err.reason) {
-                let translated = translator.translate(err.reason, settings.userLang);
-                throw new Error(translated);
-            } else {
-                winston.error('[nodebb-plugin-reputation-rules] Error on upvote filter hook');
-                winston.error(err);
-                throw err;
+                throw new Error(await this.translateError(err, data));
             }
+
+            winston.error('[nodebb-plugin-reputation-rules] Error on upvote filter hook');
+            winston.error(err);
+            throw err;
         }
     };
 
     this.filterDownvote = async function (command) {
-        let vote = getVoteFromCommand(command);
-        //winston.info('filter.post.downvote - user id: ' + vote.uid + ', post id: ' + vote.pid);
-
-        let reputationParams = new ReputationParams(vote.uid, vote.pid);
-        let data = await reputationParams.recoverParams();
+        let data = await buildParams(command);
         try {
             await ReputationManager.userCanDownvotePost(data.user, data.post);
             return command;
         } catch (err) {
-            let settings = await users.getSettings(data.user.uid);
             if (err.reason) {
-                let translated = translator.translate(err.reason, settings.userLang);
-                throw new Error(translated);
-            } else {
-                winston.error('[nodebb-plugin-reputation-rules] Error on downvote filter hook');
-                winston.error(err);
-                throw err;
+                throw new Error(await this.translateError(err, data));
             }
+
+            winston.error('[nodebb-plugin-reputation-rules] Error on downvote filter hook');
+            winston.error(err);
+            throw err;
         }
     };
 
     this.filterUnvote = async function (command) {
-        //unvote is always allowed, isn't it?
-        //winston.info('filter.post.unvote');
-
+        // unvote is always allowed
         return command;
     };
+
+    this.translateError = async function(err, data) {
+        let settings = await users.getSettings(data.user.uid);
+        return translator.translate(err.reason, settings.userLang);
+    }
 };
 
 module.exports = VoteFilter;
