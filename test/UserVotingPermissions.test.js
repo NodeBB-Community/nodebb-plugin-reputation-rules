@@ -2,6 +2,19 @@ const assert = require('assert');
 const sinon = require('sinon');
 const UserVotingPermissions = require('../UserVotingPermissions');
 
+function daysAgo(days) {
+    let now = new Date();
+    return now.getTime() - days * 24 * 60 * 60 * 1000;
+}
+
+function fiveDaysAgo() {
+    return daysAgo(5);
+}
+
+function sixtyDaysAgo() {
+    return daysAgo(60);
+}
+
 describe('UserVotingPermissions', function() {
     describe('#hasEnoughPostsToUpvote()', function() {
         it('should not throw an error when postcount is greater than the configured min posts to upvote', async function() {
@@ -67,7 +80,7 @@ describe('UserVotingPermissions', function() {
             };
             let db = {
                 getSetMembers: sinon.fake.returns(['vote1', 'vote2'])
-            }
+            };
 
             let permissions = new UserVotingPermissions(config, db, user, post);
             await permissions.hasVotedTooManyPostsInThread();
@@ -82,7 +95,7 @@ describe('UserVotingPermissions', function() {
             };
             let db = {
                 getSetMembers: sinon.fake.returns(['vote1', 'vote2', 'vote3'])
-            }
+            };
 
             let permissions = new UserVotingPermissions(config, db, user, post);
             try {
@@ -360,16 +373,3 @@ describe('UserVotingPermissions', function() {
         });
     });
 });
-
-function fiveDaysAgo() {
-    return daysAgo(5);
-}
-
-function sixtyDaysAgo() {
-    return daysAgo(60);
-}
-
-function daysAgo(days) {
-    let now = new Date();
-    return now.getTime() - days * 24 * 60 * 60 * 1000;
-}
