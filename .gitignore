@@ -32,3 +32,5 @@ node_modules
 /.project
 
 package-lock.json
+
+.nyc_output/
