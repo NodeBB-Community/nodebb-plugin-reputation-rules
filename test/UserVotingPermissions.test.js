@@ -117,7 +117,7 @@ describe('UserVotingPermissions', function() {
             };
             let db = {
                 getSetMembers: sinon.fake.returns(['vote1', 'vote2'])
-            }
+            };
 
             let permissions = new UserVotingPermissions(config, db, user, post);
             await permissions.hasVotedAuthorTooManyTimesThisMonth();
@@ -132,7 +132,7 @@ describe('UserVotingPermissions', function() {
             };
             let db = {
                 getSetMembers: sinon.fake.returns(['vote1', 'vote2', 'vote3', 'vote4', 'vote5', 'vote6', 'vote7', 'vote8', 'vote9', 'vote10'])
-            }
+            };
 
             let permissions = new UserVotingPermissions(config, db, user, post);
             try {
@@ -153,7 +153,7 @@ describe('UserVotingPermissions', function() {
             };
             let db = {
                 getSetMembers: sinon.fake.returns(['vote1', 'vote2'])
-            }
+            };
 
             let permissions = new UserVotingPermissions(config, db, user, null);
             await permissions.hasVotedTooManyTimesToday();
@@ -167,7 +167,7 @@ describe('UserVotingPermissions', function() {
             };
             let db = {
                 getSetMembers: sinon.fake.returns(['vote1', 'vote2', 'vote3', 'vote4', 'vote5'])
-            }
+            };
 
             let permissions = new UserVotingPermissions(config, db, user, null);
             try {
@@ -333,7 +333,7 @@ describe('UserVotingPermissions', function() {
             };
             let db = {
                 getSetMembers: sinon.fake.returns([])
-            }
+            };
 
             let permissions = new UserVotingPermissions(config, db, user, null);
             await permissions.hasDownvotedTooManyTimesToday();
@@ -347,7 +347,7 @@ describe('UserVotingPermissions', function() {
             };
             let db = {
                 getSetMembers: sinon.fake.returns(['vote1', 'vote2', 'vote3', 'vote4', 'vote5'])
-            }
+            };
 
             let permissions = new UserVotingPermissions(config, db, user, null);
             try {
@@ -366,7 +366,7 @@ describe('UserVotingPermissions', function() {
             };
             let db = {
                 getSetMembers: sinon.fake.returns(['vote1', 'vote2', 'vote3', 'vote4', 'vote5'])
-            }
+            };
 
             let permissions = new UserVotingPermissions(config, db, user, null);
             await permissions.hasDownvotedTooManyTimesToday();
