@@ -62,6 +62,7 @@ You can configure what "too old" means for you, for example 30 days, 90 days, or
 ## Changelog
 
 v1.2.3
+
 - Added some tests and coverage
 - Added more information to error messages when voting
 
