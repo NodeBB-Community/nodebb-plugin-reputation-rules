@@ -4,7 +4,10 @@ let UserVotingPermissions = function(Config, db, user, post) {
 
     this.hasEnoughPostsToUpvote = async function() {
         let allowed = user.postcount >= Config.minPostToUpvote();
-        if (!allowed) throw {'reason': 'notEnoughPosts'};
+        if (!allowed) throw {
+            'reason': 'notEnoughPosts',
+            'params': [Config.minPostToUpvote()]
+        };
     };
 
     this.isOldEnoughToUpvote = async function() {
@@ -12,7 +15,10 @@ let UserVotingPermissions = function(Config, db, user, post) {
         let xDaysAgo = now.getTime() - Config.minDaysToUpvote() * 24 * 60 * 60 * 1000;
 
         let allowed = user.joindate < xDaysAgo;
-        if (!allowed) throw {'reason': 'notOldEnough'};
+        if (!allowed) throw {
+            'reason': 'notOldEnough',
+            'params': [Config.minDaysToUpvote()]
+        };
     };
 
     this.hasVotedTooManyPostsInThread = async function() {
@@ -24,7 +30,10 @@ let UserVotingPermissions = function(Config, db, user, post) {
             throw err;
         }
         let allowed = userVotesInThread < Config.maxVotesPerUserInThread();
-        if (!allowed) throw {'reason': 'tooManyVotesInThread'};
+        if (!allowed) throw {
+            'reason': 'tooManyVotesInThread',
+            'params': [Config.maxVotesPerUserInThread()]
+        };
     };
 
     this.hasVotedAuthorTooManyTimesThisMonth = async function() {
@@ -36,7 +45,10 @@ let UserVotingPermissions = function(Config, db, user, post) {
             throw err;
         }
         let allowed = votesToAuthor < Config.maxVotesToSameUserInMonth();
-        if (!allowed) throw {'reason': 'tooManyVotesToSameUserThisMonth'};
+        if (!allowed) throw {
+            'reason': 'tooManyVotesToSameUserThisMonth',
+            'params': [Config.maxVotesToSameUserInMonth()]
+        };
     };
 
     this.hasVotedTooManyTimesToday = async function() {
@@ -48,12 +60,18 @@ let UserVotingPermissions = function(Config, db, user, post) {
             throw err;
         }
         let allowed = votes < Config.maxVotesPerUser(user.reputation);
-        if (!allowed) throw {'reason': 'tooManyVotesToday'};
+        if (!allowed) throw {
+            'reason': 'tooManyVotesToday',
+            'params': [Config.maxVotesPerUser(user.reputation)]
+        };
     };
 
     this.hasEnoughPostsToDownvote = async function() {
         let allowed = user.postcount >= Config.minPostToDownvote();
-        if (!allowed) throw {'reason': 'notEnoughPosts'};
+        if (!allowed) throw {
+            'reason': 'notEnoughPosts',
+            'params': [Config.minPostToDownvote()]
+        };
     };
 
     this.isOldEnoughToDownvote = async function() {
@@ -61,12 +79,18 @@ let UserVotingPermissions = function(Config, db, user, post) {
         let xDaysAgo = now.getTime() - Config.minDaysToDownvote() * 24 * 60 * 60 * 1000;
 
         let allowed = user.joindate < xDaysAgo;
-        if (!allowed) throw {'reason': 'notOldEnough'};
+        if (!allowed) throw {
+            'reason': 'notOldEnough',
+            'params': [Config.minDaysToDownvote()]
+        };
     };
 
     this.hasEnoughReputationToDownvote = async function() {
         let allowed = user.reputation >= Config.minReputationToDownvote();
-        if (!allowed) throw {'reason': 'notEnoughReputation'};
+        if (!allowed) throw {
+            'reason': 'notEnoughReputation',
+            'params': [Config.minReputationToDownvote()]
+        };
     };
 
     this.votingAllowedInCategory = async function() {
@@ -81,7 +105,10 @@ let UserVotingPermissions = function(Config, db, user, post) {
 
         let now = new Date();
         let postAgeDays = (now - post.timestamp)/24/60/60/1000;
-        if (postAgeDays > Config.getMaxPostAgeDays()) throw {'reason': 'postTooOld'};
+        if (postAgeDays > Config.getMaxPostAgeDays()) throw {
+            'reason': 'postTooOld',
+            'params': [Config.getMaxPostAgeDays()]
+        };
     };
 
     this.hasDownvotedTooManyTimesToday = async function() {
@@ -95,7 +122,10 @@ let UserVotingPermissions = function(Config, db, user, post) {
             throw err;
         }
         let allowed = downvotes < Config.maxDownvotesPerDay();
-        if (!allowed) throw {'reason': 'tooManyDownvotesToday'};
+        if (!allowed) throw {
+            'reason': 'tooManyDownvotesToday',
+            'params': [Config.maxDownvotesPerDay()]
+        };
     };
 
     async function countVotesInThread(userId, threadId) {

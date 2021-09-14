@@ -1,12 +1,12 @@
 {
   "votingDisabledInCategory": "No se puede votar en esta sección",
-  "notEnoughPosts": "No tienes suficientes mensajes",
-  "notOldEnough": "Llevas poco tiempo registrado",
-  "notEnoughReputation": "No tienes suficiente reputación",
-  "tooManyVotesInThread": "No puedes votar más mensajes en este hilo",
-  "tooManyVotesToSameUserThisMonth": "Ya has votado a este usuario este mes",
-  "tooManyVotesToday": "No puedes votar más mensajes hoy",
-  "tooManyDownvotesToday": "No puedes dar más negativos hoy",
-  "postTooOld": "No puedes votar este mensaje, es muy antiguo",
+  "notEnoughPosts": "Necesitas tener al menos <strong>%0</strong> para votar",
+  "notOldEnough": "Debes llevar al menos <strong>%0</strong> días registrado en el foro para votar",
+  "notEnoughReputation": "Necesitas al menos <strong>%0</strong> de reputación para votar",
+  "tooManyVotesInThread": "No puedes votar más mensajes en este tema, ya has votado <strong>%0</strong> mensajes",
+  "tooManyVotesToSameUserThisMonth": "Has votado <strong>%0</strong> mensajes de este usuario este mes, espera al mes siguiente para votarle de nuevo",
+  "tooManyVotesToday": "No puedes votar más mensajes hoy, ya has votado <strong>%0</strong> veces",
+  "tooManyDownvotesToday": "No puedes dar más negativos hoy, has llegado al máximo de <strong>%0</strong> en un día",
+  "postTooOld": "No se pueden votar mensajes con más de <strong>%0</strong> días de antigüedad",
   "unknownError": "Error al votar"
 }

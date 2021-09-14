@@ -5,30 +5,30 @@ const fs = require.main.require("fs");
 const LANGUAGE_DIR = __dirname + '/public/languages/';
 
 let languages, texts = null;
-loadTexts();
+
+function replaceParams(message, params) {
+    if (!params) return message;
+
+    return message.replace(/%(\d+)/gi, (match, captured) => { return params[captured]; });
+}
+
+function languageSupported(language) {
+    return languages.indexOf(language) !== -1;
+}
 
 let translator = {
-    translate(text, language, defaultLanguage) {
+    translate(text, params, language, defaultLanguage) {
         if (!languageSupported(language)) {
             language = defaultLanguage || 'en_GB';
         }
 
         if (texts[language][text]) {
-            return texts[language][text];
+            return replaceParams(texts[language][text], params);
         } else {
             return text;
         }
     }
 };
-
-function loadTexts() {
-    languages = [];
-    texts = [];
-    fs.readdirSync(LANGUAGE_DIR).forEach(function (langFolder) {
-        languages.push(langFolder);
-        texts[langFolder] = loadLanguageTexts(langFolder);
-    });
-}
 
 function loadLanguageTexts(language) {
     let allPhrases = {};
@@ -41,8 +41,14 @@ function loadLanguageTexts(language) {
     return allPhrases;
 }
 
-function languageSupported(language) {
-    return languages.indexOf(language) !== -1;
+function loadTexts() {
+    languages = [];
+    texts = [];
+    fs.readdirSync(LANGUAGE_DIR).forEach(function (langFolder) {
+        languages.push(langFolder);
+        texts[langFolder] = loadLanguageTexts(langFolder);
+    });
 }
 
+loadTexts();
 module.exports = translator;

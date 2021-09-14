@@ -23,7 +23,8 @@ let ReputationManager = function (Config) {
         } catch (err) {
             throw {
                 'allowed': false,
-                'reason': err.reason
+                'reason': err.reason,
+                'params': err.params
             };
         }
     };
@@ -47,7 +48,8 @@ let ReputationManager = function (Config) {
         } catch (err) {
             throw {
                 'allowed': false,
-                'reason': err.reason
+                'reason': err.reason,
+                'params': err.params
             };
         }
     };

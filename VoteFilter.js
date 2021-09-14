@@ -61,7 +61,7 @@ let VoteFilter = function(ReputationManager, users) {
             winston.error(err.message);
         }
         let settings = await users.getSettings(data.user.uid);
-        return translator.translate(err.reason, settings.userLang);
+        return translator.translate(err.reason, err.params, settings.userLang);
     }
 };
 

@@ -1,12 +1,12 @@
 {
   "votingDisabledInCategory": "Voting has been disabled in this category",
-  "notEnoughPosts": "Not enough messages to vote",
-  "notOldEnough": "You are not an old enough member of this forum",
-  "notEnoughReputation": "You don't have enough reputation",
-  "tooManyVotesInThread": "You can't vote more messages in this thread",
-  "tooManyVotesToSameUserThisMonth": "You can't vote this user again until next month",
-  "tooManyVotesToday": "You can't vote more messages today",
-  "tooManyDownvotesToday": "You can't downvote more messages today",
-  "postTooOld": "You can't vote this message, it is too old",
+  "notEnoughPosts": "You need to have at least <strong>%0</strong> posts to vote",
+  "notOldEnough": "You have to be a member of this forum for <strong>%0</strong> days before you can vote",
+  "notEnoughReputation": "You need at least <strong>%0</strong> reputation to vote",
+  "tooManyVotesInThread": "You can't vote more messages in this thread, you already voted <strong>%0</strong> posts here",
+  "tooManyVotesToSameUserThisMonth": "You already voted <strong>%0</strong> times for this user and this month, wait until next month",
+  "tooManyVotesToday": "You can't vote more messages today, you already voted <strong>%0</strong> times",
+  "tooManyDownvotesToday": "You can't downvote more messages today, you already downvoted <strong>%0</strong> posts",
+  "postTooOld": "You can't vote messages older than <strong>%0</strong> days",
   "unknownError": "Error voting"
 }
