@@ -39,6 +39,7 @@ describe('UserVotingPermissions', function() {
                 assert.fail('expected an error');
             } catch (err) {
                 assert.strictEqual(err.reason, 'notEnoughPosts');
+                assert.deepStrictEqual(err.params, [20]);
             }
         });
     });
@@ -66,6 +67,7 @@ describe('UserVotingPermissions', function() {
                 assert.fail('expected an error');
             } catch (err) {
                 assert.strictEqual(err.reason, 'notOldEnough');
+                assert.deepStrictEqual(err.params, [6]);
             }
         });
     });
@@ -103,6 +105,7 @@ describe('UserVotingPermissions', function() {
                 assert.fail('expected an error');
             } catch (err) {
                 assert.strictEqual(err.reason, 'tooManyVotesInThread');
+                assert.deepStrictEqual(err.params, [3]);
             }
         });
     });
@@ -140,6 +143,7 @@ describe('UserVotingPermissions', function() {
                 assert.fail('expected an error');
             } catch (err) {
                 assert.strictEqual(err.reason, 'tooManyVotesToSameUserThisMonth');
+                assert.deepStrictEqual(err.params, [10]);
             }
         });
     });
@@ -175,6 +179,7 @@ describe('UserVotingPermissions', function() {
                 assert.fail('expected an error');
             } catch (err) {
                 assert.strictEqual(err.reason, 'tooManyVotesToday');
+                assert.deepStrictEqual(err.params, [5]);
             }
         });
     });
@@ -202,6 +207,7 @@ describe('UserVotingPermissions', function() {
                 assert.fail('expected an error');
             } catch (err) {
                 assert.strictEqual(err.reason, 'notEnoughPosts');
+                assert.deepStrictEqual(err.params, [20]);
             }
         });
     });
@@ -229,6 +235,7 @@ describe('UserVotingPermissions', function() {
                 assert.fail('expected an error');
             } catch (err) {
                 assert.strictEqual(err.reason, 'notOldEnough');
+                assert.deepStrictEqual(err.params, [6]);
             }
         });
     });
@@ -256,6 +263,7 @@ describe('UserVotingPermissions', function() {
                 assert.fail('expected an error');
             } catch (err) {
                 assert.strictEqual(err.reason, 'notEnoughReputation');
+                assert.deepStrictEqual(err.params, [20]);
             }
         });
     });
@@ -310,6 +318,7 @@ describe('UserVotingPermissions', function() {
                 assert.fail('expected an error');
             } catch (err) {
                 assert.strictEqual(err.reason, 'postTooOld');
+                assert.deepStrictEqual(err.params, [30]);
             }
         });
 
@@ -355,6 +364,7 @@ describe('UserVotingPermissions', function() {
                 assert.fail('expected an error');
             } catch (err) {
                 assert.strictEqual(err.reason, 'tooManyDownvotesToday');
+                assert.deepStrictEqual(err.params, [5]);
             }
         });
 
