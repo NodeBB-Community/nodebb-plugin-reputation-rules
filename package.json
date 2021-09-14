@@ -24,5 +24,12 @@
   "nbbpm": {
     "compatibility": "^1.18.0"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies": {
+    "nyc": "^15.1.0",
+    "sinon": "^11.1.2"
+  },
+  "scripts": {
+    "test": "nyc --reporter=lcov --reporter=text-summary mocha"
+  }
 }
