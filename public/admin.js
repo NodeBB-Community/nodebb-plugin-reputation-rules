@@ -1,3 +1,5 @@
+/* globals socket */
+
 define('admin/plugins/reputation-rules', ['settings'], function(settings) {
 	const ACP = {};
 
@@ -18,7 +20,7 @@ define('admin/plugins/reputation-rules', ['settings'], function(settings) {
 				socket.emit('admin.settings.syncReputationRules');
 			});
 		});
-	}
+	};
 
 	return ACP;
 });

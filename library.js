@@ -26,7 +26,7 @@ plugin.onLoad = function (params, callback) {
         res.render('admin/plugins/reputation-rules', {
             title: 'Reputation Rules',
         });
-    })
+    });
 
     SocketAdmin.settings.syncReputationRules = function () {
         pluginSettings.sync(function () {
