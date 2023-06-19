@@ -19,14 +19,15 @@ plugin.onLoad = function (params, callback) {
     ReputationManager = new (require('./ReputationManager'))(Config);
     VoteFilter = new (require('./VoteFilter'))(ReputationManager, users);
 
-    let { router } = params;
-    const routeHelpers = require.main.require('./src/routes/helpers');
+    let router = params.router,
+        middleware = params.middleware;
 
-    routeHelpers.setupAdminPageRoute(router, '/admin/plugins/reputation-rules',  function renderAdmin(req, res) {
-        res.render('admin/plugins/reputation-rules', {
-            title: 'Reputation Rules',
-        });
-    });
+    function renderAdmin(req, res, next) {
+        res.render('admin/plugins/reputation-rules', {});
+    }
+
+    router.get('/admin/plugins/reputation-rules', middleware.admin.buildHeader, renderAdmin);
+    router.get('/api/admin/plugins/reputation-rules', renderAdmin);
 
     SocketAdmin.settings.syncReputationRules = function () {
         pluginSettings.sync(function () {
