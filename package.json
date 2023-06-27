@@ -5,7 +5,7 @@
   "main": "library.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/exo-do/nodebb-plugin-reputation-rules"
+    "url": "https://github.com/NodeBB-Community/nodebb-plugin-reputation-rules"
   },
   "keywords": [
     "nodebb",
@@ -18,7 +18,7 @@
   },
   "license": "GNU-GPL v2",
   "bugs": {
-    "url": "https://github.com/exo-do/nodebb-plugin-reputation-rules/issues"
+    "url": "https://github.com/NodeBB-Community/nodebb-plugin-reputation-rules/issues"
   },
   "readmeFilename": "README.md",
   "nbbpm": {
