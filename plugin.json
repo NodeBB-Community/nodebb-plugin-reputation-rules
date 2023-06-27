@@ -2,7 +2,7 @@
   "id": "nodebb-plugin-reputation-rules",
   "name": "Reputation Rules Plugin for NodeBB",
   "description": "Reputation rules to prevent abuse and make it more reliable",
-  "url": "https://github.com/exo-do/nodebb-plugin-reputation-rules",
+  "url": "https://github.com/NodeBB-Community/nodebb-plugin-reputation-rules",
   "library": "./library.js",
   "scss": [
     "public/scss/style.scss"

@@ -1,5 +1,5 @@
 {
-  "name": "nodebb-plugin-reputation-rules",
+  "name": "@nodebb/nodebb-plugin-reputation-rules",
   "version": "1.2.3",
   "description": "Reputation rules to prevent abuse and make it more reliable",
   "main": "library.js",
