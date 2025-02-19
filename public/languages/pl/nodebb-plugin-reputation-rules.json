@@ -1,0 +1,12 @@
+{
+  "votingDisabledInCategory": "Głosowanie w tej kategorii zostało wyłączone",
+  "notEnoughPosts": "Musisz popełnić co najmniej <strong>%0</strong> wpisów aby głosować",
+  "notOldEnough": "Musisz mieć staż liczący <strong>%0</strong> dni aby głosować",
+  "notEnoughReputation": "Musisz mieć co namniej <strong>%0</strong> w polu reputatacja aby głosować",
+  "tooManyVotesInThread": "Za dużo głosów w tym wątku. Głosowałeś już na <strong>%0</strong> wpisów",
+  "tooManyVotesToSameUserThisMonth": "W tym miesiącu głosowałeś już <strong>%0</strong> razy na tego użytkownika. Kolejna szansa już w przyszłym miesiącu",
+  "tooManyVotesToday": "Osiągnąłeś limit głosów na dziś głosując <strong>%0</strong> razy",
+  "tooManyDownvotesToday": "Koniec z głosowaniem na nie. Dałeś kciuk w dół przy <strong>%0</strong> wpisach",
+  "postTooOld": "Nie możesz głosować na wiadomości starsze niż <strong>%0</strong> dni",
+  "unknownError": "Błąd przy głosowaniu"
+}
